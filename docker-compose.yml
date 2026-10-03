@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}          # read from the root .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      # host 5433 -> container 5432 (5433 avoids clashing with a local Postgres on 5432).
+      # Other containers still reach it at db:5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data        # data survives container restarts
+    healthcheck:
+      # $$ = evaluated by the container's shell, not by Compose
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot "prepare the database": apply Alembic migrations, then seed analyst accounts.
+  # api (and later worker) wait for it, so they never start against an old schema
+  # and never race each other migrating.
+  migrate:
+    build: .
+    command: ["sh", "-c", "alembic upgrade head && python -m app.seed_users"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SEED_USERS: ${SEED_USERS}
+    depends_on:
+      db:
+        condition: service_healthy   # start only after pg_isready passes
+    restart: "no"
+
+  api:
+    build: .
+    environment:
+      # Inside Compose the database host is the service name `db` (port 5432, not 5433).
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully   # only after migrations exit 0
+
+volumes:
+  pgdata:
