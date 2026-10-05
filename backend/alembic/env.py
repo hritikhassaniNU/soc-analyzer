@@ -20,10 +20,23 @@ config.set_main_option("sqlalchemy.url", get_settings().database_url)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # Keep loggers that already exist: by default fileConfig disables them, which silenced the
+    # app's warnings for the rest of the process whenever migrations ran in-process (tests).
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # Our models' metadata, so `alembic revision --autogenerate` can diff models vs. the DB.
 target_metadata = Base.metadata
+
+
+def include_object(obj, name, type_, reflected, compare_to):
+    """Ignore per-upload event partitions (events_u42, ...), created at runtime by the worker.
+
+    Without this, autogenerate sees tables with no matching model and proposes DROP TABLE,
+    which would delete real uploaded data.
+    """
+    if type_ == "table" and name and name.startswith("events_u") and name[8:].isdigit():
+        return False
+    return True
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -47,6 +60,7 @@ def run_migrations_offline() -> None:
     context.configure(
         url=url,
         target_metadata=target_metadata,
+        include_object=include_object,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
@@ -70,7 +84,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata, include_object=include_object
         )
 
         with context.begin_transaction():
