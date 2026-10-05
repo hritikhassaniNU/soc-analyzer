@@ -4,6 +4,7 @@ import type { components } from '@/api/schema'
 import { Button } from '@/components/ui/button'
 import { useUsers } from '@/api/users'
 import RichText from '@/components/RichText'
+import { SourceLabel } from '@/components/SourceLabel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PRIORITY_META } from '@/lib/incidents'
 
@@ -48,6 +49,8 @@ export function ReviewCard({ title, review, generate, empty, stacked = false }: 
               </p>
             )}
             <Analysis r={r} stacked={stacked} />
+            {/* "AI-generated" only when Claude wrote it; template text has no footer (D138). */}
+            {r.source === 'ai' && <p className="meta"><SourceLabel ai /></p>}
           </>
         ) : (
           review.isSuccess && (

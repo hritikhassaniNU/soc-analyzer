@@ -127,7 +127,7 @@ function Overview({ d }: { d: InvestigationDetail }) {
           <>
             {/* Plain text: it can quote log-derived names. */}
             <p className="leading-relaxed">{d.why_flagged}</p>
-            {d.narrative_source && <SourceLabel ai={d.narrative_source === 'ai'} />}
+            {d.narrative_source === 'ai' && <SourceLabel ai />}
           </>
         ) : (
           <p className="text-sm text-muted-foreground">No written summary for this incident.</p>
@@ -306,7 +306,7 @@ function AiAnalysis({ d }: { d: InvestigationDetail }) {
       )}
       <CaseSearches d={d} />
       {/* Just the label; how the AI is constrained lives in the README (D124). */}
-      {d.narrative_source && <p className="meta"><SourceLabel ai={d.narrative_source === 'ai'} /></p>}
+      {d.narrative_source === 'ai' && <p className="meta"><SourceLabel ai /></p>}
     </Panel>
   )
 }
