@@ -1,11 +1,15 @@
 # SOC Analyzer
 
-Upload Zscaler web proxy logs and get an analyst-ready view of them: a summary, an activity
-timeline, top users and destinations, rule-based threat detections, and a searchable,
-filterable table of every log line.
+A small SOC console for Zscaler web proxy logs: upload a log file and get a company-wide
+dashboard, correlated **investigations** (cases with a workflow), per-user risk profiles, a
+searchable log explorer and a detection-rules catalog, with rule-based, statistical, ML and
+AI (Claude) detection and AI-written triage.
 
 Built as a full-stack take-home exercise: **FastAPI + PostgreSQL + DuckDB** on the backend,
 **React + TypeScript** on the frontend, everything runnable with one `docker compose` command.
+
+**Live demo:** <https://soc-analyzer-nh4n.onrender.com> (free tier: the first visit after a quiet
+period takes about a minute to wake up).
 
 ---
 
@@ -28,8 +32,11 @@ Then open **http://localhost:8000** and sign in:
 |---|---|
 | `analyst` | `ChangeMe-Demo-123` |
 
-Upload **`samples/zscaler_sample.csv`** from the upload form. It is analyzed in the background
-(a few seconds for this file) and the row turns **Done**; click **View**.
+> **Demo login:** one shared analyst account (`SEED_USERS`), for demo purposes only; there is no
+> sign-up or single sign-on. The live demo uses its own password, shared on request.
+
+Go to **Upload Logs** and upload **`samples/zscaler_sample.csv`**. It is analyzed in the
+background (a few seconds) and the row turns **Scanned**; click **Open**.
 
 | Task | Command |
 |---|---|
@@ -50,26 +57,29 @@ innocent look-alikes (Windows updates, a developer's `curl`, large uploads to co
 app polling, evening workers). Each sample has a `.truth.json` answer key listing exactly which
 lines are attacks and which are look-alikes.
 
-Upload `zscaler_sample.csv`, open it, and look for:
+Upload `zscaler_sample.csv`, then:
 
-1. **Overview → Incidents:** two **critical** incidents for `jdoe`. Tuesday: a malware download
-   by a script, then the laptop calling `cdn-update-check.xyz` every ~60 s for 8 hours, into the
-   evening. Sunday 02:40: ~400 MB uploaded to mega.nz at night. Then three **high** (a blocked
-   malware site, an allowed risky site, random-looking domains) and one **medium** (a request
-   burst). Expand an incident (▸) to read the evidence; **View events →** opens its log lines.
-2. **Events → tick "In anomaly window" and "Flagged only":** across the whole week, exactly four
-   lines remain: jdoe's Sunday uploads, each made by a script inside the large-upload window.
-3. **Overview → Activity over time:** the spike on Thursday 11:00 UTC (a peak of ~900
-   requests) is a user making ~600 requests in two minutes.
-4. **Overview → Top senders:** `jdoe` sent ~400 MB, about 4x anyone else (an exfiltration to
-   mega.nz on Sunday at 02:47).
-5. **Events → Rule = Zscaler threat:** three blocked requests to a malware site.
-6. **Events → User = jdoe, Host = mega.nz:** the four ~100 MB uploads, made by a script
-   (`python-requests`). Expand a row (▸) to see every field.
+1. **Dashboard:** security-overview tiles (click any to drill down), a one-line AI review (full
+   review in a side panel), incidents over time, risk by severity / evidence category, priority
+   investigations, users at highest risk and highest-risk entities.
+2. **Investigations:** two **critical** cases for `jdoe` (Tuesday: malware downloaded by a script,
+   then the laptop calling `cdn-update-check.xyz` every ~60 s for 8 hours; Sunday 02:40: ~400 MB
+   uploaded to mega.nz at night), three **high** (blocked malware site, allowed risky site,
+   random-looking domains) and one **medium** (a request burst). The cases-per-day chart filters
+   by day or severity.
+3. **Open a case:** why it was flagged, risk breakdown, timeline with the user's activity around
+   the incident, entities, evidence, AI analysis with a triage suggestion, and **Investigate
+   next** buttons that open Logs already filtered. Assign it, start investigating, add notes and
+   resolve it with a verdict.
+4. **Logs:** every line, with search, time presets, sources, Allowed/Blocked and
+   "Anomalies only"; the histogram zooms on click.
+5. **Users:** risk per user and department; a user's profile shows their activity and cases.
+6. **Detection Rules:** every detector with its logic, false positives, hits and an on/off switch.
 
-Then upload `zscaler_clean.csv` for contrast: no medium-or-higher incidents at all. Its ~15
-low-priority incidents (Windows updates, a developer's `curl`, uploads to company storage) are
-kept for the record and hidden behind "Show 15 low priority".
+Then upload `zscaler_clean.csv` for contrast: no medium-or-higher incidents at all, only ~15 low
+ones (Windows updates, a developer's `curl`, uploads to company storage) kept for the record.
+With `ANTHROPIC_API_KEY` set, `zscaler_sample.csv` also yields a **medium** case for a Microsoft
+look-alike phishing domain that only the AI detector sees.
 
 ---
 
@@ -83,16 +93,19 @@ kept for the record and hidden behind "Show 15 low priority".
   (at most 3 attempts), temporary database/storage errors are retried with a delay, and a
   rejected file still shows its line counts and bad-line samples.
 - **Dashboard (company-wide):** clickable security-overview tiles (events with a 7-day trend,
-  anomalies, open investigations, critical, high-risk entities), an on-demand AI analysis, incidents
-  over time, severity and category breakdown, priority investigations, users at risk and
-  highest-risk entities. (The per-file charts view was removed in step 26; per-file totals are on
-  each upload's details page and in the Dashboard's "Events by dataset" table.)
-- **Incidents:** each user's findings correlated into incidents, ranked critical → low with a
-  heuristic confidence score, readable evidence for every finding, and one click to the exact log
-  lines (see *Detection* below).
-- **Events table:** every log line, filterable by user, action, rule, host, category, time window,
-  "flagged only" (rule hits) and "in anomaly window" (inside a statistical finding); fast paging through millions of rows; flagged lines highlighted; filters
-  live in the URL (shareable, Back works).
+  anomalies, open investigations, critical, high-risk entities), an on-demand AI review, incidents
+  over time, risk by severity and evidence category, priority investigations, users at risk and
+  highest-risk entities. Repeated incidents across re-uploaded datasets are counted once.
+- **Investigations:** each user's findings correlated into cases, ranked critical → low with a
+  0–100 risk (heuristic, not a probability); a case workflow (owner, open → investigating →
+  resolved with a verdict, append-only notes); an AI triage suggestion and one-click next-step
+  searches (see *Detection* below).
+- **Users:** per-user risk, department view and a profile with activity and cases.
+- **Logs:** every log line with search, time presets, detection sources, Allowed/Blocked,
+  "Anomalies only" and a zoomable histogram; fast paging through millions of rows; filters live
+  in the URL (shareable, Back works).
+- **Detection Rules:** the detector catalog (logic, thresholds, false positives, hits, MITRE
+  ATT&CK hints) with on/off switches that apply to new scans.
 - **Bad-line reporting:** invalid lines are counted and the first 20 shown with the reason; one
   bad line never stops an analysis.
 - **Evidence integrity:** each upload's SHA-256 is recorded and shown.
@@ -171,8 +184,10 @@ following documented fields (names modeled on NSS web log fields), defined in
                 PostgreSQL ◄── worker (same image, `python -m app.worker`)
    users, sessions, uploads (= job queue),          claims queued uploads (FOR UPDATE SKIP LOCKED)
    events (one partition per upload),               pass 1: stream + parse + rules ──► COPY into Postgres
-   upload_summary                                                                 └─► Parquet file
-                                                    pass 2: DuckDB on the Parquet ──► summary + timeline + top lists
+   findings, incidents, cases + notes,                                            └─► Parquet file
+   summaries, reviews, detector settings            pass 2: DuckDB on the Parquet ──► aggregates, statistics,
+                                                            ML, AI domain classifier, incidents
+                                                    narrate: Claude (or template) summaries + case triage
 ```
 
 Key points:
@@ -326,18 +341,21 @@ npm run gen:api   # regenerate TypeScript types from the backend's OpenAPI schem
 ```
 backend/
   app/
-    api/            auth, uploads, analysis (summary + events) routes
-    parsing/        CSV layout, event model, timestamps, streaming parser, upload sniffing
-    detection/      rules (layer 1)
-    pipeline/       pass 1 (parse → Postgres + Parquet), pass 2 (DuckDB aggregates)
+    api/            auth, uploads, events, dashboard, investigations, users, rules
+    parsing/        CSV / JSON-lines formats, gzip, timestamps, streaming parser, upload sniffing
+    detection/      rules, statistics, beaconing, rare domains, ML, AI domains, correlation, catalog
+    llm/            Claude client, pseudonymized payload, template fallback, case searches
+    pipeline/       pass 1 (parse → Postgres + Parquet), pass 2 (DuckDB + detection), narrate
     worker.py       job loop          storage.py   local storage (GCS-ready interface)
-    generator.py    synthetic logs    web.py       serves the React build + security headers
+    generator.py    synthetic logs    evaluate.py  detection quality on generated weeks
+    web.py          serves the React build + security headers
   alembic/          database migrations
+  start.sh          one-container start (migrate, worker, API) for small hosts
   tests/            unit + integration tests
 frontend/
   src/api/          typed API client + data hooks (generated types in schema.d.ts)
-  src/components/   dashboard, events table, upload form, layout
-  src/pages/        login, uploads, upload detail (Overview / Events)
+  src/components/   dashboard, investigations, events, users, rules, charts, layout
+  src/pages/        dashboard, investigations + case, users + profile, logs, uploads, rules, login
 samples/            synthetic logs + answer keys (+ edge_cases/)
 ```
 
@@ -362,5 +380,13 @@ samples/            synthetic logs + answer keys (+ edge_cases/)
 **Roadmap**
 
 1. End-to-end browser tests.
-2. Deployment to Google Cloud (Cloud Run, Cloud SQL, Cloud Storage with signed uploads) with
-   login rate limiting and upload quotas for a public link.
+2. Production deployment (e.g. Cloud Run, Cloud SQL, Cloud Storage with signed uploads) with
+   login rate limiting, upload quotas and SSO.
+
+---
+
+## Deployment (Render + Neon)
+
+The live demo runs the same Docker image on a **Render** free web service (`sh start.sh`: migrate,
+worker and API in one container) with a **Neon** free Postgres (`DATABASE_URL`); secrets
+(`SEED_USERS`, `ANTHROPIC_API_KEY`) are set in Render, and uploaded files are temporary on the free plan.
