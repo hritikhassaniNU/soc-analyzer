@@ -25,6 +25,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY backend/alembic.ini ./
 COPY backend/alembic ./alembic
 COPY backend/app ./app
+COPY backend/start.sh ./
 # Only the built frontend files: no Node.js, no node_modules in the final image.
 COPY --from=frontend /frontend/dist ./static
 
