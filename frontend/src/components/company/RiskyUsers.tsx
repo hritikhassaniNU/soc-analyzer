@@ -24,7 +24,7 @@ export default function RiskyUsers({ users, total }: { users: RiskyUser[]; total
           <ol className="divide-y rounded-md border">
             {users.map((u, n) => (
               <li key={u.username}>
-                {/* Compact (D131): name + one truncated reason line; counts on hover. */}
+                {/* Compact: name + one truncated reason line; counts on hover. */}
                 <Link to={userPath(u.username)} title={`${u.reason} · ${u.incidents} incident${u.incidents === 1 ? '' : 's'} · ${u.findings} finding${u.findings === 1 ? '' : 's'}`}
                       className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50">
                   <span className="w-4 text-sm text-muted-foreground tabular-nums">{n + 1}</span>

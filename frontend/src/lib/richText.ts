@@ -4,7 +4,7 @@
 export type Part = { kind: 'text' | 'user' | 'domain'; value: string }
 
 // A hostname with at least one dot and a short letters-only TLD (mega.nz, cdn-update-check.xyz).
-// 2-6 letters: long "TLDs" are almost always threat names like Trojan.GenericKD (D94).
+// 2-6 letters: long "TLDs" are almost always threat names like Trojan.GenericKD.
 const DOMAIN = String.raw`(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,6}`
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 

@@ -33,7 +33,7 @@ function Switch({ on, label, disabled, onChange }: { on: boolean; label: string;
 }
 
 export default function DetectorTable({ detectors }: { detectors: Detector[] }) {
-  const [names, setNames] = useState<string[]>([]) // empty = all (D99)
+  const [names, setNames] = useState<string[]>([]) // empty = all
   const [types, setTypes] = useState<string[]>([])
   const [open, setOpen] = useState<string | null>(null)
   const switcher = useSwitchDetector()
@@ -99,7 +99,7 @@ export default function DetectorTable({ detectors }: { detectors: Detector[] }) 
                       {d.layer === 'ml' ? <span className="meta">Evidence only</span> : d.weight.toFixed(1)}
                     </TableCell>
                     <TableCell className="pl-6 tabular-nums">
-                      {/* Number first, its bar right after (D118): the bar reads as Hits, not Risk weight.
+                      {/* Number first, its bar right after: the bar reads as Hits, not Risk weight.
                           Bar is relative to the most-firing detector. */}
                       <div className="flex items-center gap-2">
                         <span className="w-8 text-right">{d.hits.toLocaleString()}</span>

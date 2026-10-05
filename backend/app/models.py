@@ -179,13 +179,13 @@ class UploadSummary(Base):
     stats: Mapped[dict[str, Any]] = mapped_column(JSONB)
     timeline: Mapped[dict[str, Any]] = mapped_column(JSONB)
     top_n: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    narrative: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # Claude summary (step 23)
+    narrative: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # Claude or template summary
     computed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
 
 
-ANOMALY_SOURCES = ("rule", "stat", "ml", "ai")  # ai: the Claude domain classifier (D136)
+ANOMALY_SOURCES = ("rule", "stat", "ml", "ai")  # ai: the Claude domain classifier
 
 
 class Anomaly(Base):
@@ -249,7 +249,7 @@ class Incident(Base):
     priority_score: Mapped[float] = mapped_column(REAL)
     priority: Mapped[str] = mapped_column(String(10))
     categories: Mapped[list[str]] = mapped_column(ARRAY(Text))  # e.g. {command_and_control, delivery}
-    narrative: Mapped[str | None] = mapped_column(Text)  # LLM summary (step 23)
+    narrative: Mapped[str | None] = mapped_column(Text)  # Claude or template narrative
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -274,7 +274,7 @@ class CompanyReview(Base):
     source: Mapped[str] = mapped_column(String(10))
     model: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str] = mapped_column(Text)  # plain text; may quote log-derived names
-    # Structured sections (D80); empty for reviews written before them.
+    # Structured sections; empty for reviews written before them.
     headline: Mapped[str | None] = mapped_column(Text)
     key_findings: Mapped[list[dict[str, str]]] = mapped_column(JSONB, server_default=text("'[]'"))
     actions: Mapped[list[str]] = mapped_column(JSONB, server_default=text("'[]'"))
@@ -296,7 +296,7 @@ class UserReview(Base):
     source: Mapped[str] = mapped_column(String(10))
     model: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str] = mapped_column(Text)  # plain text; may quote log-derived names
-    # Structured sections (D80); empty for reviews written before them.
+    # Structured sections; empty for reviews written before them.
     headline: Mapped[str | None] = mapped_column(Text)
     key_findings: Mapped[list[dict[str, str]]] = mapped_column(JSONB, server_default=text("'[]'"))
     actions: Mapped[list[str]] = mapped_column(JSONB, server_default=text("'[]'"))
@@ -349,7 +349,7 @@ DOMAIN_CONFIDENCES = ("low", "medium", "high")
 
 
 class DomainVerdict(Base):
-    """The AI domain classifier's answer for one host (D136), cached across uploads: a domain seen
+    """The AI domain classifier's answer for one host, cached across uploads: a domain seen
     before costs no API call. A domain name says the same thing in every log, so the cache is global."""
 
     __tablename__ = "domain_verdicts"

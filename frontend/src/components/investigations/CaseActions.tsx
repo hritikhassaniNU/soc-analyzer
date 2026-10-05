@@ -11,7 +11,7 @@ import { HttpError } from '@/lib/queryClient'
 type Verdict = keyof typeof VERDICT_LABELS
 const message = (e: unknown) => (e instanceof HttpError && e.status !== 0 ? e.message : "Can't reach the server. Try again.")
 
-/** Logs filtered to the lines that contributed to the case (D117). */
+/** Logs filtered to the lines that contributed to the case. */
 function evidenceParams(d: InvestigationDetail): URLSearchParams {
   const user = d.entities.find((e) => e.type === 'user')?.name ?? ''
   const params = drillDownParams(d.upload_id, user, d.start_ts, d.end_ts)
@@ -19,7 +19,7 @@ function evidenceParams(d: InvestigationDetail): URLSearchParams {
   return params
 }
 
-/** Header actions (D91): Assign to me, View evidence events, and ONE primary action that follows the
+/** Header actions: Assign to me, View evidence events, and ONE primary action that follows the
  *  workflow: Open → "Start investigating", Investigating → "Resolve…", Resolved → "Reopen". */
 export default function CaseActions({ d }: { d: InvestigationDetail }) {
   const me = useMe().data?.username
@@ -35,7 +35,7 @@ export default function CaseActions({ d }: { d: InvestigationDetail }) {
           </Button>
         )}
         <Button asChild variant="outline" size="sm">
-          {/* Only the lines that contributed (D117): this user, this window, Anomalies only (a rule match
+          {/* Only the lines that contributed: this user, this window, Anomalies only (a rule match
               or inside one of the findings' windows). "All events" on Logs shows the surrounding context. */}
           <Link to={{ pathname: '/logs', search: evidenceParams(d).toString() }} title="Events that contributed to this case">
             <ScrollText /> View evidence events
@@ -66,7 +66,7 @@ export default function CaseActions({ d }: { d: InvestigationDetail }) {
 export function ResolveDialog({ d, dialog }: { d: InvestigationDetail; dialog: React.RefObject<HTMLDialogElement | null> }) {
   const update = useUpdateInvestigation(d)
   const addNote = useAddNote(d.id)
-  // Pre-selected (D135): the case's own verdict, else the AI's suggestion (the analyst can change it).
+  // Pre-selected: the case's own verdict, else the AI's suggestion (the analyst can change it).
   const suggested = d.ai_assessment ? AI_VERDICT_TO_CASE[d.ai_assessment.verdict] : null
   const [verdict, setVerdict] = useState<Verdict | ''>((d.verdict as Verdict | null) ?? suggested ?? '')
   const [note, setNote] = useState('')

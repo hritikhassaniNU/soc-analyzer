@@ -58,7 +58,7 @@ function Detail({ id }: { id: number }) {
         <>
           <Header d={inv.data} />
           {/* Tab bar above both columns, so the tab content and the Case details panel start at the
-              same height (D115). */}
+              same height. */}
           <Tabs value={tab} onValueChange={selectTab} className="min-w-0">
             <TabsList variant="line">
               {TABS.map(([value, label]) => (
@@ -97,7 +97,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
-/** Compact case header (D91): number + severity + status pills, title, window, and the actions. */
+/** Compact case header: number + severity + status pills, title, window, and the actions. */
 function Header({ d }: { d: InvestigationDetail }) {
   return (
     <section className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card p-5">
@@ -118,7 +118,7 @@ function Header({ d }: { d: InvestigationDetail }) {
 function Overview({ d }: { d: InvestigationDetail }) {
   return (
     <div className="flex flex-col gap-6">
-    {/* Triage first (D135): the AI's suggestion, then one-click searches. */}
+    {/* Triage first: the AI's suggestion, then one-click searches. */}
     <AiAssessment d={d} />
     <CaseSearches d={d} className="rounded-xl border bg-card px-4 py-3" />
     <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
@@ -176,7 +176,7 @@ function Overview({ d }: { d: InvestigationDetail }) {
 }
 
 /** "Risk 100: driven by command & control (90), +10 each for executable download and unusual hours.
- *  A ranking for triage, not a probability." Built from this case's real breakdown (D95). */
+ *  A ranking for triage, not a probability." Built from this case's real breakdown. */
 function RiskSentence({ d }: { d: InvestigationDetail }) {
   const [top, ...rest] = d.risk_breakdown
   if (!top) return null
@@ -193,7 +193,7 @@ function RiskSentence({ d }: { d: InvestigationDetail }) {
 function Timeline({ d }: { d: InvestigationDetail }) {
   return (
     <Panel title="Investigation timeline">
-      {/* The user's traffic around the incident, its window shaded in the severity color (D118). */}
+      {/* The user's traffic around the incident, its window shaded in the severity color. */}
       <div className="rounded-lg border bg-muted/20 p-3">
         <VolumeChart points={d.activity.points} bucketMinutes={d.activity.bucket_minutes} height={120}
                      shade={{ start: d.start_ts, end: d.end_ts, color: SEVERITY_COLORS[d.priority], label: `Incident window (${formatWindow(d.start_ts, d.end_ts)})` }}
@@ -262,7 +262,7 @@ function Evidence({ d }: { d: InvestigationDetail }) {
   )
 }
 
-/** Compact AI analysis (D116): the short summary, then next steps and questions side by side,
+/** Compact AI analysis: the short summary, then next steps and questions side by side,
  *  the AI boundary as one small line. Log-derived text is rendered as plain text. */
 function AiAnalysis({ d }: { d: InvestigationDetail }) {
   const box = 'rounded-lg border bg-muted/30 p-4'
@@ -305,7 +305,7 @@ function AiAnalysis({ d }: { d: InvestigationDetail }) {
         </div>
       )}
       <CaseSearches d={d} />
-      {/* Just the label; how the AI is constrained lives in the README (D124). */}
+      {/* Just the label; how the AI is constrained lives in the README. */}
       {d.narrative_source === 'ai' && <p className="meta"><SourceLabel ai /></p>}
     </Panel>
   )

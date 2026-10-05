@@ -3,7 +3,7 @@ import { useDeleteUpload } from '@/api/uploads'
 import { Button } from '@/components/ui/button'
 import { HttpError } from '@/lib/queryClient'
 
-/** The one Delete button (D96): same look (destructive, trash icon), same confirmation and same
+/** The one Delete button: same look (destructive, trash icon), same confirmation and same
  *  error handling wherever an upload can be deleted (Upload Logs list, upload details). */
 export default function DeleteUploadButton({ upload, onDeleted }: {
   upload: { id: number; filename: string }

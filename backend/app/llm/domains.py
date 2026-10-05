@@ -1,4 +1,4 @@
-"""Ask Claude to classify rare domains (D136). Never raises: on any problem the answer is {} (the
+"""Ask Claude to classify rare domains. Never raises: on any problem the answer is {} (the
 AI detector then simply adds nothing).
 
 Defenses, as for the summaries (client.py):

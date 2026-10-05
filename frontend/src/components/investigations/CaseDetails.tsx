@@ -9,8 +9,8 @@ import { HttpError } from '@/lib/queryClient'
 // Inline field: looks like text until hovered/focused (label: value rows, like SOC case panels).
 const FIELD = 'h-8 w-full rounded-md border border-transparent bg-transparent px-2 text-sm hover:border-input focus-visible:border-input disabled:opacity-60'
 
-/** "Case details" side panel (D91): status, owner and verdict edited inline, plus the facts.
- *  The server enforces the rules (D67); choosing Resolved opens the resolve dialog (verdict first). */
+/** "Case details" side panel: status, owner and verdict edited inline, plus the facts.
+ *  The server enforces the rules; choosing Resolved opens the resolve dialog (verdict first). */
 export default function CaseDetails({ d }: { d: InvestigationDetail }) {
   const update = useUpdateInvestigation(d)
   const dialog = useRef<HTMLDialogElement>(null)

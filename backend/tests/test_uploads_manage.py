@@ -43,7 +43,7 @@ def test_list_is_newest_first_with_uploader(logged_in, sample_csv):
 
 def test_detail_includes_processing_fields(logged_in, sample_csv, db_session):
     upload_id = upload(logged_in, sample_csv, "monday.log")
-    db_session.execute(  # simulate what the worker will record (step 10)
+    db_session.execute(  # simulate what the worker records
         update(Upload).where(Upload.id == upload_id).values(
             line_count=200, bad_line_count=1,
             bad_line_samples=[{"line_no": 7, "reason": "Missing required field 'user'", "raw": "<script>x</script>"}],

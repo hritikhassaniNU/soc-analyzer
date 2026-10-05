@@ -2,7 +2,7 @@ import type { EventFilters } from '@/api/events'
 import { RULE_LABELS } from '@/lib/rules'
 
 // Event filters live in the URL (?username=jdoe&flagged=1&start=...), so a filtered view can be
-// bookmarked, shared, and linked to from incidents (step 20), and the Back button works.
+// bookmarked, shared, and linked to from incidents, and the Back button works.
 // These two functions convert between URL parameters and the API's filter object.
 
 const TEXT_KEYS = ['username', 'category', 'host'] as const
@@ -25,7 +25,7 @@ export function filtersFromParams(params: URLSearchParams): EventFilters {
   const action = params.get('action')
   if (action === 'Allowed' || action === 'Blocked') filters.action = action
   if (params.get('flagged') === '1') filters.flagged = true
-  // Sources checkboxes (D99): ?sources=rule:executable_download,window:stat. Older links
+  // Sources checkboxes: ?sources=rule:executable_download,window:stat. Older links
   // (?rule=, ?window=, ?in_window=1) are read into the same list, so they keep working.
   const sources = new Set((params.get('sources') ?? '').split(',').filter((s) => (SOURCE_VALUES as readonly string[]).includes(s)))
   const oldRule = params.get('rule')
@@ -34,10 +34,10 @@ export function filtersFromParams(params: URLSearchParams): EventFilters {
   if (oldWindow === 'stat' || oldWindow === 'ml') sources.add(`window:${oldWindow}`)
   if (params.get('in_window') === '1') { sources.add('window:stat'); sources.add('window:ml') }
   if (sources.size) filters.source = SOURCE_VALUES.filter((s) => sources.has(s)) as EventFilters['source']
-  // Filter bar (D83): search, detection source, anomaly.
+  // Filter bar: search, detection source, anomaly.
   const q = params.get('q')?.trim()
   if (q) filters.q = q.slice(0, 200)
-  // (No line severity: severity is an incident concept; the Logs filter was removed, D95.)
+  // (No line severity: severity is an incident concept; the Logs filter was removed.)
   if (params.get('anomalous') === '1') filters.anomalous = true
   for (const key of ['start', 'end'] as const) {
     const value = params.get(key)
@@ -91,7 +91,7 @@ type CaseSearch = {
   start: string | null; end: string | null
 }
 
-/** Logs-page URL parameters for one of a case's next-step searches (D135). The backend already
+/** Logs-page URL parameters for one of a case's next-step searches. The backend already
  *  rounded the window outward to minutes; times are normalized to "…Z". */
 export function caseSearchParams(uploadId: number, s: CaseSearch): URLSearchParams {
   const z = (value: string | null) => (value ? iso(Date.parse(value)) : undefined)
@@ -105,7 +105,7 @@ export function caseSearchParams(uploadId: number, s: CaseSearch): URLSearchPara
 const DAY = 86_400_000
 const iso = (ms: number) => new Date(ms).toISOString().replace('.000Z', 'Z')
 
-/** Time-range presets counted back from NOW (the user's call, D112): "last 3 days" means what it
+/** Time-range presets counted back from NOW: "last 3 days" means what it
  *  says. Rounded to the minute; the end is exclusive, one minute after now. */
 export function timePresets(nowMs: number = Date.now()) {
   const afterNow = (Math.floor(nowMs / MINUTE) + 1) * MINUTE

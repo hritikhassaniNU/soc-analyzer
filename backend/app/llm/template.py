@@ -40,11 +40,11 @@ class IncidentNarrative:
     narrative: str
     next_steps: list[str]
     next_questions: list[str] = field(default_factory=list)
-    # D135: the AI's triage suggestion ({verdict, confidence, reason}; None from the template) and
+    # The AI's triage suggestion ({verdict, confidence, reason}; None from the template) and
     # the picked next-step searches (Search.stored() dicts: label + Logs filters).
     assessment: dict[str, str] | None = None
     searches: list[dict[str, Any]] = field(default_factory=list)
-    # Who wrote THIS incident's text (D137): with Claude on, low incidents still get template text.
+    # Who wrote THIS incident's text: with Claude on, low incidents still get template text.
     source: str = "template"
 
 
@@ -54,7 +54,7 @@ class Narrative:
     summary: str
     incidents: dict[int, IncidentNarrative] = field(default_factory=dict)  # our incident id -> text
     model: str | None = None
-    # Structured sections for the analysis cards (D80): a one-line headline, the key findings
+    # Structured sections for the analysis cards: a one-line headline, the key findings
     # (priority of the incident each describes + one sentence) and the recommended actions.
     headline: str | None = None
     key_findings: list[tuple[str, str]] = field(default_factory=list)
@@ -70,7 +70,7 @@ def _when(start: datetime, end: datetime) -> str:
 
 def template_narrative(incidents: list[IncidentInput]) -> Narrative:
     shown = sorted((i for i in incidents if i.priority in SENT_PRIORITIES), key=lambda i: -i.priority_score)
-    # Every incident gets the free "why flagged" text, low ones too (D137): a low case can still be a
+    # Every incident gets the free "why flagged" text, low ones too: a low case can still be a
     # real attack (e.g. a phishing page only the AI saw). Claude still writes only medium+.
     narratives = _incident_narratives(incidents)
     if not shown:
@@ -85,7 +85,7 @@ def template_narrative(incidents: list[IncidentInput]) -> Narrative:
                f"Most serious: {top.username}, {_when(top.start, top.end)}: {top.title.lower()}.")
     headline = (f"{len(shown)} incident{' needs' if len(shown) == 1 else 's need'} attention; "
                 f"most serious: {top.username} ({top.title.lower()}).")
-    key_findings = [(i.priority, f"{i.username}: {i.title.lower()}, {i.start:%b %d}.") for i in shown[:3]]  # short (D94)
+    key_findings = [(i.priority, f"{i.username}: {i.title.lower()}, {i.start:%b %d}.") for i in shown[:3]]  # short
     actions: list[str] = []
     for incident in shown:  # the first step of each serious incident, most serious first
         step = narratives[incident.id].next_steps[0] if narratives[incident.id].next_steps else None
@@ -105,7 +105,7 @@ def _incident_narratives(incidents: list[IncidentInput]) -> dict[int, IncidentNa
                 steps.append(NEXT_STEPS[category])
             if NEXT_QUESTIONS[category] not in questions:
                 questions.append(NEXT_QUESTIONS[category])
-        # Compact (D116): when, then the strongest finding's reason, then what else was seen.
+        # Compact: when, then the strongest finding's reason, then what else was seen.
         strongest = max(findings, key=lambda f: f.score) if findings else None
         others = sorted({CATEGORY_LABELS[CATEGORY_OF_KIND.get(f.kind, 'behavioral_outlier')] for f in findings}
                         - ({CATEGORY_LABELS[CATEGORY_OF_KIND.get(strongest.kind, 'behavioral_outlier')]} if strongest else set()))

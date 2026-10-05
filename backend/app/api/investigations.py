@@ -1,7 +1,7 @@
 """Investigations: the company-wide case queue and each case's full picture.
 
 A case is one unique incident (user + time window + title) across all completed uploads; its
-evidence comes from the newest analysis of that incident (the same rule as the dashboard).
+evidence comes from the newest analysis of that incident.
 """
 
 from collections import defaultdict
@@ -152,14 +152,14 @@ class CaseActivity(BaseModel):
 
 
 class AiAssessment(BaseModel):
-    """The AI's triage suggestion (D135): the analyst decides; words, never a percentage."""
+    """The AI's triage suggestion: the analyst decides; words, never a percentage."""
     verdict: Literal["likely_malicious", "likely_benign", "needs_more_evidence"]
     confidence: Literal["low", "medium", "high"]
     reason: str  # model-written: plain text
 
 
 class CaseSearch(BaseModel):
-    """A ready-made Logs search (D135). Filters come from our menu, never from the model."""
+    """A ready-made Logs search. Filters come from our menu, never from the model."""
     id: str
     label: str
     username: str | None
@@ -183,7 +183,7 @@ class InvestigationDetail(InvestigationItem):
     related_entities: list[DetailEntity]
     notes: list[NoteOut]  # oldest first; append-only
     analysts: list[str]  # who a case can be assigned to
-    activity: CaseActivity  # the user's traffic around the incident (Timeline strip, D118)
+    activity: CaseActivity  # the user's traffic around the incident (Timeline strip)
 
 
 def _identity(x: Any) -> tuple:
@@ -258,7 +258,7 @@ def _item(db: Session, case: Case, incident: Incident, findings: list[Anomaly], 
     return dict(
         id=case.id, number=f"INC-{case.id}", name=_case_name(main, findings), title=incident.title,
         priority=incident.priority, risk=round(incident.priority_score * 100),
-        signals=len(incident.title.split(", ")),  # the title lists exactly the categories that count (D40)
+        signals=len(incident.title.split(", ")),  # the title lists exactly the categories that count
         alerts=len(findings), entities=chips, status=case.status,
         owner=owners.get(case.owner_id) if case.owner_id else None, verdict=case.verdict,
         updated_at=case.updated_at, start_ts=incident.start_ts, end_ts=incident.end_ts, upload_id=incident.upload_id,
@@ -296,7 +296,7 @@ def list_investigations(
     if q and (needle := q.strip().lower()):
         items = [it for it in items if needle in " ".join(
             [it.number, it.name, it.title] + [e.name for e in it.entities]).lower()]
-    # Unresolved first (what analysts work on), then worst first, newest first (D87).
+    # Unresolved first (what analysts work on), then worst first, newest first.
     return sorted(items, key=lambda it: (it.status == "resolved", -it.risk, -it.start_ts.timestamp(), it.id))
 
 
@@ -338,7 +338,7 @@ def _detail(db: Session, case_id: int) -> InvestigationDetail:
     case, incident = pair
     findings = _findings(db, [incident.id])[incident.id]
 
-    # Risk breakdown: the correlation formula (D40) per category, from the findings themselves.
+    # Risk breakdown: the correlation formula per category, from the findings themselves.
     approved = parse_hosts(get_settings().approved_upload_hosts)
     weights: dict[str, float] = {}
     for f in findings:
@@ -352,7 +352,7 @@ def _detail(db: Session, case_id: int) -> InvestigationDetail:
 
     summary = db.get(UploadSummary, incident.upload_id)
     written = ((summary.narrative or {}).get("incidents", {}) if summary else {}).get(str(incident.id), {})
-    # Per incident since D137 (low incidents get template text even when Claude wrote the rest);
+    # Per incident (low incidents get template text even when Claude wrote the rest);
     # older analyses only have the document's source.
     source = written.get("source") or ((summary.narrative or {}).get("source") if summary and summary.narrative else None)
 
@@ -375,7 +375,7 @@ def _detail(db: Session, case_id: int) -> InvestigationDetail:
         # Analyses written before questions existed: derive them from this case's evidence categories.
         next_questions=written.get("next_questions") or [NEXT_QUESTIONS[c] for c in ranked if c in NEXT_QUESTIONS][:3],
         ai_assessment=written.get("assessment") if source == "ai" else None,
-        # Analyses written before D135 have no searches: the defaults, from this case's evidence.
+        # Older analyses have no searches: the defaults, from this case's evidence.
         searches=written.get("searches") or [s.stored() for s in default_picks(search_menu(
             incident.username, incident.start_ts, incident.end_ts,
             [f.details or {} for f in sorted(findings, key=lambda f: -f.score)]))],
@@ -447,7 +447,7 @@ def update_investigation(case_id: int, change: CaseUpdate, user: CurrentUser,
     if change.status is not None:
         case.status = change.status
 
-    # Workflow rules (D67): someone owns what is being investigated; a resolved case says why.
+    # Workflow rules: someone owns what is being investigated; a resolved case says why.
     if case.status == "investigating" and case.owner_id is None:
         case.owner_id = user.id
     if case.status == "resolved" and case.verdict is None:

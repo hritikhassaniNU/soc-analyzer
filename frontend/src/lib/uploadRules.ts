@@ -4,7 +4,7 @@ export const ALLOWED_EXTENSIONS = ['.log', '.txt', '.csv', '.json', '.jsonl', '.
 
 /** What the format field accepts: detect from the content, or force one. */
 // `label`: for upload rows; `option`: dropdown text. What's supported is stated once, in the
-// drop zone (D107), not repeated in every option.
+// drop zone, not repeated in every option.
 export const FORMAT_CHOICES = [
   { value: 'auto', label: 'Auto-detect', option: 'Auto-detect' },
   { value: 'csv', label: 'CSV', option: 'CSV' },

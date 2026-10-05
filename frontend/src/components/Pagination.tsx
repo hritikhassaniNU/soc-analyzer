@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { pageWindow } from '@/lib/pagination'
 
-/** "Showing 51–75 of 17,546" + Previous · 1 … 4 5 6 … 702 · Next. Shared by Users and Logs (D86). */
+/** "Showing 51–75 of 17,546" + Previous · 1 … 4 5 6 … 702 · Next. Shared by Users and Logs. */
 export default function Pagination({ page, pages, from, to, total, noun, onPage, busy = false }: {
   page: number; pages: number; from: number; to: number; total: number | null; noun: string
   onPage: (page: number) => void; busy?: boolean

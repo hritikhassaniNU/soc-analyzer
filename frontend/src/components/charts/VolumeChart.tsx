@@ -19,17 +19,17 @@ const VOLUME_SERIES = [
 ] as const
 
 /**
- * Events over time (D118): all events as soft bars, Blocked and rule-flagged as lines (overlapping
+ * Events over time: all events as soft bars, Blocked and rule-flagged as lines (overlapping
  * counts, so lines, not stacks). Optional shaded windows (an incident) and click-to-select a bucket.
  * Legend + tooltip name every series; callers offer the numbers as a table where it matters.
  */
 export default function VolumeChart({ points, bucketMinutes, height = 160, shade, onSelect, label, title, defaultHidden = [] }: {
   points: VolumePoint[]; bucketMinutes: number; height?: number; label: string; title?: ReactNode
-  defaultHidden?: readonly VolumeSeries[] // series off until the legend turns them on (D129)
+  defaultHidden?: readonly VolumeSeries[] // series off until the legend turns them on
   shade?: { start: string; end: string; color: string; label: string }
   onSelect?: (start: string, end: string) => void
 }) {
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(defaultHidden)) // legend toggles (D120)
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(defaultHidden)) // legend toggles
   const data = points.map((p) => ({ ...p, t: Date.parse(p.ts) }))
   if (data.length === 0) return null
   const first = data[0].t
@@ -42,11 +42,11 @@ export default function VolumeChart({ points, bucketMinutes, height = 160, shade
   const zoomUnit = bucketLabel(bucketMinutes).replace(/^(\d+) (\w+?)s$/, '$1-$2 window') // "15-minute window"
   return (
     <div className="flex flex-col gap-2">
-      {/* Title, legend and hint on one line; legend entries show/hide their series (D120). */}
+      {/* Title, legend and hint on one line; legend entries show/hide their series. */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         {title}
         {shade && (
-          // The shaded band is named in the legend (D124), never an unexplained color.
+          // The shaded band is named in the legend, never an unexplained color.
           <span className="inline-flex items-center gap-1.5 px-1">
             <span className="size-2.5 rounded-sm" style={{ background: shade.color, opacity: 0.35 }} aria-hidden /> {shade.label}
           </span>
@@ -72,7 +72,7 @@ export default function VolumeChart({ points, bucketMinutes, height = 160, shade
             {shade && (
               <ReferenceArea x1={snap(Date.parse(shade.start))} x2={snap(Date.parse(shade.end))} fill={shade.color} fillOpacity={0.12} stroke="none" ifOverflow="hidden" />
             )}
-            {/* Category axis (D123): every bucket gets a real bar width, even when a zoom leaves a few. */}
+            {/* Category axis: every bucket gets a real bar width, even when a zoom leaves a few. */}
             <XAxis dataKey="t" type="category" minTickGap={24} interval="preserveStartEnd"
                    ticks={multiDay ? midnightTicks(first, last) : undefined}
                    tickFormatter={(t) => (multiDay ? dayTick : timeTick).format(t)}

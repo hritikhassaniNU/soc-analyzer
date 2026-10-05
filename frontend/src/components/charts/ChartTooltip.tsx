@@ -1,6 +1,6 @@
 type Entry = { name?: string | number; dataKey?: unknown; value?: unknown; color?: string; payload?: unknown }
 
-/** One tooltip for every chart (D122): the bucket, a row per series with its color key, and an
+/** One tooltip for every chart: the bucket, a row per series with its color key, and an
  *  optional muted last line saying what a click does, so the charts carry no instruction text. */
 export default function ChartTooltip({ active, payload, label, title, names, hideZero, reverse, hint }: {
   active?: boolean; payload?: readonly Entry[]; label?: unknown

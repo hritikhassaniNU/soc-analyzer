@@ -60,7 +60,7 @@ function Profile({ username }: { username: string }) {
   )
 }
 
-/** Profile header (D93): identity on the left, current risk on the right, the explanation as a
+/** Profile header: identity on the left, current risk on the right, the explanation as a
  *  callout with a button to the case that sets it, a stat strip, then devices and IPs with their
  *  share of the user's events. Log times in UTC like the rest of the app. */
 function Header({ p }: { p: UserProfile }) {
@@ -79,7 +79,7 @@ function Header({ p }: { p: UserProfile }) {
           </span>
           <div className="flex min-w-0 flex-col gap-2">
             <h1 className="page-title break-all">{p.username}</h1>
-            {/* Identity facts as labeled chips (D93): readable at a glance, not a grey subtitle. */}
+            {/* Identity facts as labeled chips: readable at a glance, not a grey subtitle. */}
             <ul className="flex flex-wrap gap-2 text-sm">
               <IdentityChip icon={Building2} label="Department" value={p.department} />
               <IdentityChip icon={MapPin} label="Location" value={p.location} />
@@ -167,7 +167,7 @@ function ShareList({ title, items, total, empty }: {
 
 function Cases({ p }: { p: UserProfile }) {
   const [page, setPage] = useState(1)
-  const paged = paginate(p.cases, page, 10) // 10 per page inside the profile column (D95)
+  const paged = paginate(p.cases, page, 10) // 10 per page inside the profile column
   return (
     <Panel title={`Cases (${p.cases.length})`}>
       {p.cases.length === 0 ? <p className="text-sm text-muted-foreground">No incidents for this user.</p> : (

@@ -123,7 +123,7 @@ def test_no_job_returns_false(db_session):
 
 
 
-# ---- reliability: stale jobs, retries (step 25) ----
+# ---- reliability: stale jobs, retries ----
 
 def set_row(upload_id: int, **values) -> None:
     """Simulate the past directly in the database (e.g. a worker that died 20 minutes ago)."""

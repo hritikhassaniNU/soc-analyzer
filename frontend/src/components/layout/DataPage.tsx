@@ -29,7 +29,7 @@ export default function DataPage({ title, children }: { title: string; children:
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-6">
-      {/* The dataset sits with the page it controls (D82), not in the app-wide top bar. */}
+      {/* The dataset sits with the page it controls, not in the app-wide top bar. */}
       <div className="flex flex-col gap-3">
         <h1 className="page-title">{title}</h1>
         <DatasetPicker />

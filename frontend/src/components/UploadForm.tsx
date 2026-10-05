@@ -77,7 +77,7 @@ export default function UploadForm() {
         <UploadIcon className="size-8 text-muted-foreground" aria-hidden />
         <div>
           <p className="section-title">Drop a log file here</p>
-          {/* Exactly what is supported (D95): one log type, two formats, these file names. */}
+          {/* Exactly what is supported: one log type, two formats, these file names. */}
           <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-left text-sm">
             <dt className="text-muted-foreground">Log type</dt><dd>Zscaler web proxy (NSS web log feed)</dd>
             <dt className="text-muted-foreground">Formats</dt><dd>CSV or JSON lines, plain or gzip-compressed (.gz)</dd>

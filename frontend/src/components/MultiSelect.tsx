@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils'
 export type MultiOption = { value: string; label: string; icon?: LucideIcon; iconClass?: string; count?: number }
 
 /**
- * A dropdown with checkboxes (D88): the same severity filter on Investigations, Users and Logs.
+ * A dropdown with checkboxes: the same severity filter on Investigations, Users and Logs.
  * Nothing checked = all. The button says what's chosen ("Critical, High", "3 selected").
  * Native checkboxes inside, so keyboard and screen readers work; Escape or a click outside closes it.
- * The panel is rendered in a portal with fixed positioning (D101): cards use overflow-hidden, which
+ * The panel is rendered in a portal with fixed positioning: cards use overflow-hidden, which
  * clipped it to one row when the list below was empty.
  */
 export default function MultiSelect({ allLabel, label, options, selected, onChange }: {

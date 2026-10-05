@@ -1,4 +1,4 @@
-"""D136: the AI domain classifier: candidates, findings, the Claude call's defenses, and the cache.
+"""The AI domain classifier: candidates, findings, the Claude call's defenses, and the cache.
 Claude itself is replaced by fakes here; the live measurement is `python -m app.evaluate --ai`."""
 
 import io
@@ -84,14 +84,14 @@ def test_detect_runs_it_only_with_a_classifier_and_honors_the_switch(week):
                              classify_domains=classify)) == [] and classify.calls == []
     with_ai = detect(duckdb_connection(), path, classify_domains=classify)
     [finding] = ai_sources(with_ai)
-    # A brand look-alike weighs 0.9 (D137): alone, 0.7 x 0.9 = 0.63, a medium case for amiller.
+    # A brand look-alike weighs 0.9: alone, 0.7 x 0.9 = 0.63, a medium case for amiller.
     [incident] = [i for i in with_ai.incidents if finding in [with_ai.findings[m][1] for m in i.members]]
     assert incident.username == "amiller" and incident.title == "Suspicious domain (AI)"
     assert (incident.priority, incident.priority_score) == ("medium", 0.63)
 
 
 def test_other_ai_labels_keep_the_low_weight(week):
-    """Random names and file sharing stay at 0.6: alone they only corroborate (D136)."""
+    """Random names and file sharing stay at 0.6: alone they only corroborate."""
     path, _ = week
     generated = DomainVerdictInput("random_generated", "high", "random letters", MODEL)
     detection = detect(duckdb_connection(), path, classify_domains=labels(**{"rnicrosoft-login.com": generated}))

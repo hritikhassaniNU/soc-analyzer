@@ -1,6 +1,6 @@
 import type { Upload } from '@/api/uploads'
 
-/** Upload Logs filters (D100): ?q=sample&status=done,failed&format=csv. Unknown values are ignored. */
+/** Upload Logs filters: ?q=sample&status=done,failed&format=csv. Unknown values are ignored. */
 export const UPLOAD_STATUSES = { queued: 'Queued', processing: 'Processing', done: 'Scanned', failed: 'Failed' } as const
 export const UPLOAD_FORMATS = { csv: 'CSV', json: 'JSON lines' } as const
 export type UploadFilters = { q: string; statuses: string[]; formats: string[] }

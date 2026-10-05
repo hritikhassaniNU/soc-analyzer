@@ -6,7 +6,7 @@ import { caseSearchParams } from '@/lib/eventFilters'
 import { AI_VERDICT_LABELS } from '@/lib/investigations'
 import { cn } from '@/lib/utils'
 
-/** The AI's triage suggestion (D135): verdict + confidence in words + the deciding evidence.
+/** The AI's triage suggestion: verdict + confidence in words + the deciding evidence.
  *  Only shown when Claude wrote the analysis; the analyst always decides. */
 export function AiAssessment({ d }: { d: InvestigationDetail }) {
   const a = d.ai_assessment
@@ -27,7 +27,7 @@ export function AiAssessment({ d }: { d: InvestigationDetail }) {
   )
 }
 
-/** Next-step searches as buttons that open Logs already filtered (D135). The filters come from the
+/** Next-step searches as buttons that open Logs already filtered. The filters come from the
  *  backend's menu; the AI only picked and labeled them. */
 export function CaseSearches({ d, className }: { d: InvestigationDetail; className?: string }) {
   if (d.searches.length === 0) return null

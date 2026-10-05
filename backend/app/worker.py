@@ -5,7 +5,7 @@
 The `uploads` table is the job queue. Several workers can run at once: the claim uses
 FOR UPDATE SKIP LOCKED, so each queued upload is claimed by exactly one worker.
 
-Reliability (step 25):
+Reliability:
 - Heartbeat: every progress write refreshes `locked_at`. A 'processing' upload silent for
   STALE_AFTER (its worker crashed, was OOM-killed, or lost its machine) is claimed again.
 - At most MAX_ATTEMPTS tries per upload; then it fails with a clear message.

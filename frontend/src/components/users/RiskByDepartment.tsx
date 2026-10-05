@@ -13,12 +13,12 @@ const META: Record<UserSeverity, { label: string; color: string }> = {
   low: { label: PRIORITY_META.low.label, color: SEVERITY_COLORS.low },
   none: { label: 'No open risk', color: 'var(--viz-axis)' },
 }
-// Users with open risk are drawn by default (D121): a gray 'no risk' segment dominated every bar.
-// 'No open risk' is drawn only when that severity is picked in the filter (D128).
+// Users with open risk are drawn by default: a gray 'no risk' segment dominated every bar.
+// 'No open risk' is drawn only when that severity is picked in the filter.
 const AT_RISK = ['critical', 'high', 'medium', 'low'] as const
 const RANK: Record<UserSeverity, number> = { critical: 4, high: 3, medium: 2, low: 1, none: 0 }
 
-/** Users per department stacked by their severity (D121): where risk is concentrated. Follows every
+/** Users per department stacked by their severity: where risk is concentrated. Follows every
  *  filter except department; clicking a department bar or a legend entry filters the table. */
 export default function RiskByDepartment({ users, departments, severities, onToggleDepartment, onToggleSeverity }: {
   users: UserListItem[]; departments: readonly string[]; severities: readonly UserSeverity[]

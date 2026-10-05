@@ -447,7 +447,7 @@
           "analysis"
         ],
         "summary": "Events Histogram",
-        "description": "Events over time for the current filters (D118): the Logs chart above the table. The range is\nthe time filter when set (so a zoom shows the whole zoomed window), else the matching events'.",
+        "description": "Events over time for the current filters: the Logs chart above the table. The range is\nthe time filter when set (so a zoom shows the whole zoomed window), else the matching events'.",
         "operationId": "events_histogram_api_uploads__upload_id__events_histogram_get",
         "parameters": [
           {
@@ -1093,7 +1093,7 @@
           "analysis"
         ],
         "summary": "List Events",
-        "description": "Log lines in time order, filtered (all filters AND-ed). Two ways to page (D86):\n- `cursor` (KEYSET): `(ts, line_no) > cursor` uses the (ts, line_no) index, so Next/Previous\n  are equally fast at any depth. `line_no` breaks ties between events with the same timestamp,\n  so no row is skipped or repeated at a page boundary.\n- `offset`: jump straight to page N (clicking a page number). Postgres reads and discards the\n  rows before it, which is fast for our files and slower only deep into multi-million-line ones.\nThe total comes from /events/count (asked once per filter). The sort order is fixed.",
+        "description": "Log lines in time order, filtered (all filters AND-ed). Two ways to page:\n- `cursor` (KEYSET): `(ts, line_no) > cursor` uses the (ts, line_no) index, so Next/Previous\n  are equally fast at any depth. `line_no` breaks ties between events with the same timestamp,\n  so no row is skipped or repeated at a page boundary.\n- `offset`: jump straight to page N (clicking a page number). Postgres reads and discards the\n  rows before it, which is fast for our files and slower only deep into multi-million-line ones.\nThe total comes from /events/count (asked once per filter). The sort order is fixed.",
         "operationId": "list_events_api_uploads__upload_id__events_get",
         "parameters": [
           {
@@ -2469,7 +2469,7 @@
           "reason"
         ],
         "title": "AiAssessment",
-        "description": "The AI's triage suggestion (D135): the analyst decides; words, never a percentage."
+        "description": "The AI's triage suggestion: the analyst decides; words, never a percentage."
       },
       "AnomalyOut": {
         "properties": {
@@ -2753,7 +2753,7 @@
           "end"
         ],
         "title": "CaseSearch",
-        "description": "A ready-made Logs search (D135). Filters come from our menu, never from the model."
+        "description": "A ready-made Logs search. Filters come from our menu, never from the model."
       },
       "CaseUpdate": {
         "properties": {

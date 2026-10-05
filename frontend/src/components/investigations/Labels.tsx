@@ -19,7 +19,7 @@ export function SeverityPill({ priority }: { priority: Investigation['priority']
 
 const ENTITY_TYPES = { user: 'User', device: 'Device', ip: 'IP', domain: 'Domain' } as const
 
-/** Entities grouped by type (D124): the type is said once ("Domains"), then its values as chips,
+/** Entities grouped by type: the type is said once ("Domains"), then its values as chips,
  *  instead of "DOMAIN x", "DOMAIN y", ... Domains/IPs/devices are plain text; users link to profiles. */
 export function EntityChips({ entities }: { entities: Investigation['entities'] }) {
   const groups = (Object.keys(ENTITY_TYPES) as (keyof typeof ENTITY_TYPES)[])

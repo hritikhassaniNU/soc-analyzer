@@ -44,13 +44,13 @@ def test_all_nine_attack_kinds_are_planted():
     assert {p.kind for p in plants} == {
         "executable_download", "beaconing", "zscaler_threat", "high_risk_allowed",
         "request_burst", "rare_domain", "off_hours", "large_upload",
-        "lookalike_domain",  # D136: for the AI domain classifier
+        "lookalike_domain",  # For the AI domain classifier
     }
     assert all(p.line_nos for p in plants)
 
 
 def test_the_ai_plants_leave_every_older_row_unchanged(monkeypatch):
-    """D136: the AI plants use their own random stream and are added last, so a week generated
+    """The AI plants use their own random stream and are added last, so a week generated
     without them is exactly the same week minus the new lines."""
     with_ai, _ = generate(SMALL)
     monkeypatch.setattr(Generator, "_ai_plants_for_day", lambda self, day_index, day: [])

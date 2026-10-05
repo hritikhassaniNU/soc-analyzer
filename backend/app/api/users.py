@@ -40,7 +40,7 @@ class UserListItem(BaseModel):
     cases: int
     events: int
     last_seen: datetime
-    reason: str | None  # main kinds of evidence in the unresolved cases, strongest first (D84)
+    reason: str | None  # main kinds of evidence in the unresolved cases, strongest first
 
 
 class Count(BaseModel):
@@ -120,7 +120,7 @@ class UserProfile(BaseModel):
     cases: list[InvestigationItem]  # newest first
     timeline: list[DayIncidents]
     baseline: Baseline
-    activity: Activity  # blocked and flagged per time bucket (D92)
+    activity: Activity  # blocked and flagged per time bucket
 
 
 def _risk_by_user(db: Session) -> dict[str, list]:
@@ -221,7 +221,7 @@ def get_user(username: str, user: CurrentUser, db: Annotated[Session, Depends(ge
         by_day[incident.start_ts.date()].append(incident.priority)
     order = ["low", "medium", "high", "critical"]
 
-    # Activity chart (D92): hourly counts from Postgres, re-bucketed here so long histories stay readable.
+    # Activity chart: hourly counts from Postgres, re-bucketed here so long histories stay readable.
     hour_start = func.date_trunc("hour", Event.ts).label("hour")
     hourly = db.execute(
         select(hour_start, func.count(), func.count().filter(Event.action == "Blocked"),

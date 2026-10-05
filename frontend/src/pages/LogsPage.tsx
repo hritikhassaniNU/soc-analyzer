@@ -5,7 +5,7 @@ import EventsTable from '@/components/events/EventsTable'
 import DataPage from '@/components/layout/DataPage'
 import { filtersFromParams, paramsWithFilters } from '@/lib/eventFilters'
 
-/** One dataset's events with filters (the per-file overview tab was removed at the user's request, D82). */
+/** One dataset's events with filters. */
 export default function LogsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = filtersFromParams(searchParams) // event filters live in the URL, next to ?upload=

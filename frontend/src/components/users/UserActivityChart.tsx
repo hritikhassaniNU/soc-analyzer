@@ -13,7 +13,7 @@ const SERIES = [
   { key: 'flagged', label: 'Flagged by rules', color: 'var(--series-3)' },
 ] as const
 
-/** This user's blocked and rule-flagged requests per time bucket (D92), with each incident's window
+/** This user's blocked and rule-flagged requests per time bucket, with each incident's window
  *  shaded in its severity color. Every series is named in the legend and tooltip, and the same
  *  numbers are available as a table (never color alone). */
 export default function UserActivityChart({ activity }: { activity: UserProfile['activity'] }) {

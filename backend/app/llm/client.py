@@ -5,7 +5,7 @@ Defenses against prompt injection (log text is attacker-controlled):
    close the tag), and the system prompt says everything in there is untrusted data.
 2. The answer must match a JSON schema (structured outputs: the API constrains the model's output
    to SCHEMA), not free text. (A forced tool call was the first design; Sonnet 5.5 rejects forced
-   tool_choice, found by a live call: D50.)
+   tool_choice, found by a live call.)
 3. The answer can only add words: priorities and incidents are fixed before the model runs, ids
    we didn't send are ignored, lengths are capped, and the UI renders it as plain text labeled
    "AI-generated". Worst case, a successful injection produces a misleading paragraph next to
@@ -26,7 +26,7 @@ from app.llm.template import IncidentNarrative, Narrative, template_narrative
 log = logging.getLogger(__name__)
 
 MAX_SUMMARY = 1200
-MAX_NARRATIVE = 320  # ~2 short sentences: a hard stop if the model ignores the limit (D116)
+MAX_NARRATIVE = 320  # ~2 short sentences: a hard stop if the model ignores the limit
 MAX_STEP = 140
 MAX_STEPS = 3
 MAX_HEADLINE = 120
@@ -35,7 +35,7 @@ MAX_FINDING = 160  # characters: a hard stop if the model ignores "at most 15 wo
 MAX_ACTION = 140
 PRIORITIES = ("critical", "high", "medium", "low")
 # Includes the model's thinking (Sonnet 5.5 reasons before answering): 2,000 cut answers off
-# mid-JSON (D50). Billing is per token produced, so a higher ceiling costs nothing unless used.
+# mid-JSON. Billing is per token produced, so a higher ceiling costs nothing unless used.
 MAX_OUTPUT_TOKENS = 8000
 
 SYSTEM_PROMPT = """\
@@ -107,7 +107,7 @@ SCHEMA = {
 }
 OUTPUT_CONFIG = {"format": {"type": "json_schema", "schema": SCHEMA}}
 
-# ---- Triage (D135): a verdict suggestion and next-step searches picked from our menu ----
+# ---- Triage: a verdict suggestion and next-step searches picked from our menu ----
 VERDICTS = ("likely_malicious", "likely_benign", "needs_more_evidence")
 CONFIDENCES = ("low", "medium", "high")
 MAX_REASON = 160
@@ -248,7 +248,7 @@ def summarize(
     scope: str = "this upload", overview: dict[str, Any] | None = None, triage: bool = False,
 ) -> Narrative:
     """Claude's narrative when possible, otherwise the template. Never raises. `triage` (the
-    per-upload narrative, D135) also asks for a verdict suggestion and next-step searches per incident."""
+    per-upload narrative) also asks for a verdict suggestion and next-step searches per incident."""
     fallback = template_narrative(incidents)
     payload, stand_ins = build_payload(stats, incidents, overview, triage=triage)
     if not payload["incidents"]:

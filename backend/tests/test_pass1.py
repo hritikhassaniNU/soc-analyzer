@@ -117,7 +117,7 @@ def test_invalid_file_leaves_no_events_but_keeps_its_stats(logged_in, sample_tex
     upload = db_session.get(Upload, upload_id)
     assert partition_count(db_session, upload_id) == 0  # data transaction rolled back
     assert upload.parquet_key is None
-    # ...but the counts and bad-line samples were saved separately, to show the analyst why (D55)
+    # ...but the counts and bad-line samples were saved separately, to show the analyst why
     assert (upload.line_count, upload.bad_line_count) == (260, 200) and len(upload.bad_line_samples) == 20
     parquet_files = [p for p in storage.root.rglob("*.parquet")]
     assert parquet_files == []  # atomic write discarded the partial Parquet file

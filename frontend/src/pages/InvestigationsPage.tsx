@@ -41,13 +41,13 @@ function serverFilters(params: URLSearchParams): InvestigationFilters {
   return f
 }
 
-/** The case queue (D87): severity chips with counts, compact one-line cases, unresolved first,
+/** The case queue: severity chips with counts, compact one-line cases, unresolved first,
  *  25 per page. Everything lives in the URL. */
 export default function InvestigationsPage() {
   const [params, setParams] = useSearchParams()
   const filters = serverFilters(params)
   const severities = (params.get('severity') ?? '').split(',').filter((s): s is Priority => s in PRIORITY_META)
-  // Status checkboxes (D99); the older ?status=unresolved means open + investigating.
+  // Status checkboxes; the older ?status=unresolved means open + investigating.
   const rawStatus = params.get('status') === 'unresolved' ? 'open,investigating' : params.get('status') ?? ''
   const statuses = rawStatus.split(',').filter((s): s is Investigation['status'] => s in STATUS_LABELS)
   const [search, setSearch] = useState(filters.q ?? '')
@@ -74,7 +74,7 @@ export default function InvestigationsPage() {
     && (statuses.length === 0 || statuses.includes(c.status)))
   const shown = day ? beforeDay.filter((c) => c.start_ts.startsWith(day)) : beforeDay
   const statusCounts = Object.fromEntries(Object.keys(STATUS_LABELS).map((st) => [st, all.filter((c) => c.status === st).length]))
-  // Sorting (D111): default = the server's order (unresolved first, worst first).
+  // Sorting: default = the server's order (unresolved first, worst first).
   const sorting = sortFrom(params, CASE_SORTS)
   const sorted = sorting.sort ? sortRows(shown, CASE_SORT_VALUE[sorting.sort], sorting.dir, (a, b) => a.id - b.id) : shown
   const paged = paginate(sorted, Number(params.get('page') ?? '1'))
@@ -118,7 +118,7 @@ export default function InvestigationsPage() {
         </div>
       </div>
 
-      {/* The chart follows every filter except the day it selects (D118). */}
+      {/* The chart follows every filter except the day it selects. */}
       <CasesPerDay cases={beforeDay} selected={day} onSelect={(d) => set('day', d ?? '')} severities={severities}
                    onToggleSeverity={(p) => set('severity', (severities.includes(p) ? severities.filter((s) => s !== p) : [...severities, p]).join(','))} />
       {day && (

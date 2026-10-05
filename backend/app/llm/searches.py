@@ -1,4 +1,4 @@
-"""Next-step searches for a case (D135): ready-made Logs filters built from the evidence.
+"""Next-step searches for a case: ready-made Logs filters built from the evidence.
 
 The backend builds the menu; the AI may only pick entries by id and label them, so it can never
 invent a filter (a prompt-injected answer can at worst choose a less useful search). Without an

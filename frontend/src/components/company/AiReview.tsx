@@ -25,7 +25,6 @@ export function ReviewCard({ title, review, generate, empty, stacked = false }: 
       <CardHeader className={stacked ? 'flex flex-wrap items-center gap-2 pr-12' : 'flex flex-wrap items-center justify-between gap-2'}>
         <CardTitle>{title}</CardTitle>
         {r && (
-          // Source label and "Generated … by …" line removed at the user's request (D78).
           <Button variant="outline" size="sm" onClick={() => generate.mutate()} disabled={generate.isPending}>
             <RefreshCw /> Regenerate analysis
           </Button>
@@ -49,7 +48,7 @@ export function ReviewCard({ title, review, generate, empty, stacked = false }: 
               </p>
             )}
             <Analysis r={r} stacked={stacked} />
-            {/* "AI-generated" only when Claude wrote it; template text has no footer (D138). */}
+            {/* "AI-generated" only when Claude wrote it; template text has no footer. */}
             {r.source === 'ai' && <p className="meta"><SourceLabel ai /></p>}
           </>
         ) : (
@@ -68,11 +67,11 @@ export function ReviewCard({ title, review, generate, empty, stacked = false }: 
   )
 }
 
-/** Headline, overview, key findings (severity icon + sentence) and recommended actions (D80).
+/** Headline, overview, key findings (severity icon + sentence) and recommended actions.
  *  Reviews written before the sections existed show their paragraph only. */
 function Analysis({ r, stacked }: { r: Review; stacked: boolean }) {
   const users = (useUsers('').data ?? []).map((u) => u.username) // known users become profile links
-  const findings = r.key_findings.slice(0, 3) // older reviews may hold 5; keep the card short (D94)
+  const findings = r.key_findings.slice(0, 3) // older reviews may hold 5; keep the card short
   const actions = r.actions.slice(0, 3)
   return (
     <div className="flex flex-col gap-4">

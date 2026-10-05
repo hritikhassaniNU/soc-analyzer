@@ -11,7 +11,7 @@ export type UserListFilters = {
   departments: string[] // empty = all (several can be checked)
   openOnly: boolean
   sort: SortKey
-  dir: 'desc' | 'asc' // click the same header again to flip (D109)
+  dir: 'desc' | 'asc' // click the same header again to flip
 }
 
 export const severityOfUser = (u: UserListItem): UserSeverity => u.priority ?? 'none'

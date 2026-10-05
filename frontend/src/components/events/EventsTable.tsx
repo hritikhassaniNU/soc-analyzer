@@ -18,7 +18,7 @@ const timeFormat = new Intl.DateTimeFormat(undefined, {
 })
 
 /**
- * Server-filtered log lines, 75 per page with page numbers (D86). The page lives in the URL;
+ * Server-filtered log lines, 75 per page with page numbers. The page lives in the URL;
  * Next/Previous continue by keyset, page numbers jump with an offset (see useEvents).
  */
 export default function EventsTable({ uploadId, filters, page, onPage }: {
@@ -51,7 +51,7 @@ export default function EventsTable({ uploadId, filters, page, onPage }: {
         {(filters.start || filters.end) && bounds?.first && bounds.last && (
           Date.parse(bounds.first) > now ? (
             // Every event is dated after now (wrong log timezone, a device clock, or test data):
-            // a "Last N" range can't include it. Say so plainly (D114).
+            // a "Last N" range can't include it. Say so plainly.
             <> Every event in this dataset is dated <b className="font-medium text-foreground">in the future</b> (from{' '}
               {formatUtc(bounds.first)}), so a "Last" range can't include it. Choose All logs or a custom range; future
               timestamps usually mean a wrong log timezone or device clock.</>
@@ -101,7 +101,7 @@ function EventTableRow({ event }: { event: EventRow }) {
   const [open, setOpen] = useState(false)
   const flagged = event.rule_hits.length > 0
   const high = event.rule_max_score >= HIGH_SCORE
-  // The line's rule score in the incident bands (D105): its dot and its row accent use that color.
+  // The line's rule score in the incident bands: its dot and its row accent use that color.
   const scoreLevel = event.rule_max_score >= 0.95 ? 'critical' : high ? 'high' : event.rule_max_score >= 0.45 ? 'medium' : 'low'
   const inWindow = event.windows.length > 0
   return (
@@ -131,7 +131,7 @@ function EventTableRow({ event }: { event: EventRow }) {
         <TableCell className="tabular-nums whitespace-nowrap">{timeFormat.format(new Date(event.ts))}</TableCell>
         <TableCell><Link to={userPath(event.username)} className="hover:underline">{event.username}</Link></TableCell>
         <TableCell>
-          {/* Outcome (D110): the same soft tinted badge for both, like the upload status badges. */}
+          {/* Outcome: the same soft tinted badge for both, like the upload status badges. */}
           {event.action === 'Blocked' ? (
             <Badge variant="destructive">Blocked</Badge>
           ) : (

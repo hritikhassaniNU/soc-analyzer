@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import { TableHead } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
-/** A sortable column header, the same on every table (D111): click to sort highest first, click
+/** A sortable column header, the same on every table: click to sort highest first, click
  *  again to flip; the arrow and aria-sort show the order. */
 export default function SortHeader({ label, active, dir, onSort, align, className }: {
   label: string; active: boolean; dir: 'asc' | 'desc'; onSort: () => void; align?: 'right'; className?: string

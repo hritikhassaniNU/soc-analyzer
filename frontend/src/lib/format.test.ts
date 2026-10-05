@@ -44,7 +44,7 @@ describe('capitalize', () => {
   })
 })
 
-describe('no comma between date and time (D119)', () => {
+describe('no comma between date and time', () => {
   it('joins date and time with a space', () => {
     expect(formatUtc('2026-09-29T08:29:00Z')).toMatch(/2026 08:29 UTC$/)
     expect(formatUtc('2026-09-29T08:29:00Z')).not.toMatch(/2026,/)

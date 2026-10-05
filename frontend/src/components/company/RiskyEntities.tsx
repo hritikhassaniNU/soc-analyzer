@@ -7,13 +7,13 @@ import { userPath } from '@/lib/users'
 
 const GROUPS = [['user', 'Users'], ['ip', 'IPs'], ['domain', 'Domains']] as const
 
-/** Where each entity leads (D130): a user's profile; an IP or domain opens the cases it appears in
+/** Where each entity leads: a user's profile; an IP or domain opens the cases it appears in
  *  (case search covers entities). */
 const entityPath = (e: Dashboard['top_entities'][number]) =>
   e.type === 'user' ? userPath(e.name) : `/investigations?q=${encodeURIComponent(e.name)}`
 
-/** Users, source IPs and domains, ranked by the highest incident they appear in. Grouped by type
- *  (D133): each heading once, then compact clickable rows. */
+/** Users, source IPs and domains, ranked by the highest incident they appear in. Grouped by type:
+ *  each heading once, then compact clickable rows. */
 export default function RiskyEntities({ entities }: { entities: Dashboard['top_entities'] }) {
   return (
     <Card>

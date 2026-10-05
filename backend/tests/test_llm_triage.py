@@ -1,4 +1,4 @@
-"""D135: the AI's triage suggestion and next-step searches picked from our menu."""
+"""The AI's triage suggestion and next-step searches picked from our menu."""
 
 from dataclasses import replace
 from datetime import timedelta

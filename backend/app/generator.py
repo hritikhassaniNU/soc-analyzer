@@ -171,7 +171,7 @@ class Generator:
         self.rng = random.Random(config.seed)  # main randomness source: reproducible output
         # Devices use their own stream (same seed), so adding them didn't change any other value.
         self.device_rng = random.Random(f"devices-{config.seed}")
-        # The AI-detector plants (D136) too: every row that existed before is byte-identical.
+        # The AI-detector plants too: every row that existed before is byte-identical.
         self.ai_rng = random.Random(f"ai-plants-{config.seed}")
         self.domains = self._make_domains()
         self.weights = [1 / (rank + 1) for rank in range(len(self.domains))]  # Zipf-like popularity
@@ -463,7 +463,7 @@ class Generator:
                                       user_agent="python-requests/2.32.3"))
         return rows
 
-    # ---- for the AI domain classifier (D136): only a language model can judge these names ----
+    # ---- for the AI domain classifier: only a language model can judge these names ----
 
     def _ai_plants_for_day(self, day_index: int, day: date) -> list[Row]:
         rng = self.ai_rng

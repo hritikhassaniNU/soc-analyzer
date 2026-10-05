@@ -22,7 +22,7 @@ export default function UploadDetailPage() {
   const id = Number(uploadId)
   if (!Number.isInteger(id) || id <= 0) return <NotFoundPage />
   if (searchParams.get('tab') === 'events') {
-    // Old links (before the sidebar) opened events here: send them to Logs with the same filters.
+    // Older links opened events here: send them to Logs with the same filters.
     const next = paramsWithFilters(new URLSearchParams({ upload: String(id) }), filtersFromParams(searchParams))
     return <Navigate to={`/logs?${next}`} replace />
   }

@@ -1,4 +1,4 @@
-/** Shared table sorting (D111): ?sort=<key>&dir=asc in the URL. Same column again flips the
+/** Shared table sorting: ?sort=<key>&dir=asc in the URL. Same column again flips the
  *  direction; a new column starts highest first. Empty values always sort last. */
 export type SortState<K extends string> = { sort: K | null; dir: 'asc' | 'desc' }
 

@@ -33,7 +33,7 @@ def _allowed_name(filename: str) -> bool:
         suffixes = suffixes[:-1]
     return bool(suffixes) and suffixes[-1] in ALLOWED_EXTENSIONS  # convenience check; the content sniff is the real one
 COPY_CHUNK = 1024 * 1024
-LIST_LIMIT = 1000  # newest first; the UI pages it 25 at a time (D95)
+LIST_LIMIT = 1000  # newest first; the UI pages it 25 at a time
 
 
 class UploadOut(BaseModel):
@@ -103,7 +103,7 @@ def _copy_to_storage(source: BinaryIO, storage: Storage, key: str, max_bytes: in
     with storage.open_write(key) as target:  # atomic: an exception below leaves nothing stored
         while chunk := source.read(COPY_CHUNK):
             size += len(chunk)
-            if size > max_bytes:  # second line of defense (e.g. no Content-Length header)
+            if size > max_bytes:  # second line of defense (no Content-Length header)
                 raise HTTPException(
                     status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                     detail=f"File is larger than {max_bytes // (1024 * 1024)} MB",

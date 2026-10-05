@@ -7,7 +7,7 @@ import { ReviewCard } from '@/components/company/AiReview'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 
-/** The AI review as one line under the KPIs (D130): its headline + "Read full review", which opens
+/** The AI review as one line under the KPIs: its headline + "Read full review", which opens
  *  the full review in a side panel. Keeps the dashboard to numbers and charts first. */
 export default function AiReviewBanner() {
   const review = useReview()

@@ -15,7 +15,7 @@ export const EVENTS_PAGE_SIZE = 75
 
 const eventsKey = (uploadId: number, filters: EventFilters, page: number) => ['uploads', uploadId, 'events', filters, page]
 
-/** Page N (1-based) of the filtered events (D86). If page N-1 is in the cache, its next_cursor
+/** Page N (1-based) of the filtered events. If page N-1 is in the cache, its next_cursor
  *  continues by keyset (fast at any depth: the Next/Previous path); otherwise (a jump to a page
  *  number, or a reload of ?page=N) it uses an offset. */
 export function useEvents(uploadId: number, filters: EventFilters, page: number) {
@@ -57,7 +57,7 @@ export function useDatasetBounds(uploadId: number) {
   })
 }
 
-/** Events per time bucket for the current filters (the Logs chart, D118). */
+/** Events per time bucket for the current filters (the Logs chart). */
 export function useEventHistogram(uploadId: number, filters: EventFilters) {
   return useQuery({
     queryKey: ['uploads', uploadId, 'events-histogram', filters],

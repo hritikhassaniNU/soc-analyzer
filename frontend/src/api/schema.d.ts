@@ -135,7 +135,7 @@ export interface paths {
         };
         /**
          * Events Histogram
-         * @description Events over time for the current filters (D118): the Logs chart above the table. The range is
+         * @description Events over time for the current filters: the Logs chart above the table. The range is
          *     the time filter when set (so a zoom shows the whole zoomed window), else the matching events'.
          */
         get: operations["events_histogram_api_uploads__upload_id__events_histogram_get"];
@@ -177,7 +177,7 @@ export interface paths {
         };
         /**
          * List Events
-         * @description Log lines in time order, filtered (all filters AND-ed). Two ways to page (D86):
+         * @description Log lines in time order, filtered (all filters AND-ed). Two ways to page:
          *     - `cursor` (KEYSET): `(ts, line_no) > cursor` uses the (ts, line_no) index, so Next/Previous
          *       are equally fast at any depth. `line_no` breaks ties between events with the same timestamp,
          *       so no row is skipped or repeated at a page boundary.
@@ -449,7 +449,7 @@ export interface components {
         };
         /**
          * AiAssessment
-         * @description The AI's triage suggestion (D135): the analyst decides; words, never a percentage.
+         * @description The AI's triage suggestion: the analyst decides; words, never a percentage.
          */
         AiAssessment: {
             /**
@@ -557,7 +557,7 @@ export interface components {
         };
         /**
          * CaseSearch
-         * @description A ready-made Logs search (D135). Filters come from our menu, never from the model.
+         * @description A ready-made Logs search. Filters come from our menu, never from the model.
          */
         CaseSearch: {
             /** Id */

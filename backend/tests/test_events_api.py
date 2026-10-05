@@ -260,7 +260,7 @@ def test_histogram_buckets_add_up_and_follow_the_filters(client, upload_id):
 
 
 def test_histogram_zoom_gets_finer_buckets_across_the_whole_window(client, upload_id):
-    """D123: a 1-hour time filter gives 1-minute bars covering the full hour (not one hourly bar)."""
+    """A 1-hour time filter gives 1-minute bars covering the full hour (not one hourly bar)."""
     first = client.get(f"/api/uploads/{upload_id}/events", params={"limit": 1}).json()["items"][0]["ts"]
     start = datetime.fromisoformat(first).replace(minute=0, second=0, microsecond=0)
     params = {"start": start.isoformat(), "end": (start + timedelta(hours=1)).isoformat()}

@@ -43,7 +43,7 @@ def test_without_a_key_the_template_summary_is_stored(analyzed, db_session):
     assert summary.narrative["summary"].startswith(tuple("123456789"))  # "N incidents need attention…"
     medium_plus = [i for i in incidents if i.priority != "low"]
     assert medium_plus and len(medium_plus) < len(incidents)
-    # Every incident, low ones too, gets the "why flagged" text (D137), labeled per incident.
+    # Every incident, low ones too, gets the "why flagged" text, labeled per incident.
     assert all(i.narrative for i in incidents)
     assert set(summary.narrative["incidents"]) == {str(i.id) for i in incidents}
     assert {w["source"] for w in summary.narrative["incidents"].values()} == {"template"}

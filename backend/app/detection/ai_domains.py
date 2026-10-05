@@ -1,4 +1,4 @@
-"""AI domain classifier (D136): the one detector where AI decides what is suspicious.
+"""AI domain classifier: the one detector where AI decides what is suspicious.
 
 Statistics can tell that a domain is RARE; only a language model can tell that `rnicrosoft-login.com`
 imitates Microsoft, or that `g9hvq1kn5cnt.top` reads like a generated name, without a hand-made list.

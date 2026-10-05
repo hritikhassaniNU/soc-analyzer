@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-import app.models  # noqa: F401  (registers all models on Base.metadata for autogenerate)
+import app.models
 from app.config import get_settings
 from app.db import Base
 
@@ -14,7 +14,7 @@ from app.db import Base
 config = context.config
 
 # Single source of configuration: the DB URL comes from our Settings (env / .env),
-# never from alembic.ini, so no password lives in a committed file.
+# never from alembic.ini, so no password lives in file.
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
 
 # Interpret the config file for Python logging.
@@ -24,7 +24,7 @@ if config.config_file_name is not None:
     # app's warnings for the rest of the process whenever migrations ran in-process (tests).
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-# Our models' metadata, so `alembic revision --autogenerate` can diff models vs. the DB.
+# Our models' metadata, so `alembic revision autogenerate` can diff models vs. the DB.
 target_metadata = Base.metadata
 
 
@@ -39,9 +39,7 @@ def include_object(obj, name, type_, reflected, compare_to):
     return True
 
 # other values from the config, defined by the needs of env.py,
-# can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:

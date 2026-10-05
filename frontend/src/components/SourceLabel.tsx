@@ -1,6 +1,6 @@
 import { Bot } from 'lucide-react'
 
-/** "AI-generated" under text Claude wrote. Template text gets no label at all (D138): the
+/** "AI-generated" under text Claude wrote. Template text gets no label at all: the
  *  response is shown on its own. (The model name is stored for auditing, not shown.) */
 export function SourceLabel({ ai }: { ai: boolean }) {
   if (!ai) return null

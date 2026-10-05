@@ -159,7 +159,7 @@ def detect_large_uploads(con: duckdb.DuckDBPyConnection, parquet: Path) -> list[
                 reason=(f"Sent {_megabytes(total)} in {hours}, {share:.0%} of the peak hour to "
                         f"{top_host} ({top_category or 'uncategorized'}); "
                         f"{usual} usual hour is {_megabytes(baseline.median)}."),
-                # Destination context for correlation (step 19): is this company storage or not?
+                # Destination context for correlation: is this company storage or not?
                 details={"bytes_out": int(total), "peak_hour_bytes": int(peak.value), "hours": len(run),
                          "top_host": top_host, "top_category": top_category, "top_host_share": round(share, 3),
                          "z": round(z, 1), "baseline": _baseline_details(baseline, source)},

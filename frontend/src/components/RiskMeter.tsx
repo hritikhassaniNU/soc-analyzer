@@ -1,7 +1,7 @@
 import type { Investigation } from '@/api/investigations'
 import { SEVERITY_COLORS } from '@/lib/incidents'
 
-/** Risk 0-100 as a short bar in the severity color + the number (D127): the one way risk is shown
+/** Risk 0-100 as a short bar in the severity color + the number: the one way risk is shown
  *  everywhere (queue, users, dashboard), never the raw 0-1 score. */
 export default function RiskMeter({ risk, priority, width = 'w-16' }: {
   risk: number; priority: Investigation['priority']; width?: string

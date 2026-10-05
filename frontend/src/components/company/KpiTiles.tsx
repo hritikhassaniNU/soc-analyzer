@@ -22,7 +22,7 @@ function Body({ label, value, sub, alert }: { label: string; value: number; sub:
   )
 }
 
-/** Security overview tiles (D81). Each opens exactly what its number counts. */
+/** Security overview tiles. Each opens exactly what its number counts. */
 export default function KpiTiles({ kpis, datasets }: { kpis: Dashboard['kpis']; datasets: Dashboard['datasets'] }) {
   const [showDatasets, setShowDatasets] = useState(false)
   const k = kpis

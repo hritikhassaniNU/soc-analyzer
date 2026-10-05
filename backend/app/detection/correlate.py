@@ -35,7 +35,7 @@ CATEGORY_OF_KIND = {
     "request_burst": "automated_traffic",
     "off_hours": "unusual_hours",
     "behavioral_outlier": "behavioral_outlier",  # ML: attached as evidence only (see run.py)
-    "ai_suspicious_domain": "suspicious_domain",  # the Claude domain classifier (D136)
+    "ai_suspicious_domain": "suspicious_domain",  # the Claude domain classifier
 }
 SEVERITY = {
     "known_threat": 1.0,
@@ -45,10 +45,10 @@ SEVERITY = {
     "automated_traffic": 0.6,
     "unusual_hours": 0.6,
     "behavioral_outlier": 0.4,
-    # Low (user's choice, D136): an AI opinion corroborates other evidence but rarely raises a case alone.
+    # Low: an AI opinion corroborates other evidence but rarely raises a case alone.
     "suspicious_domain": 0.6,
 }
-# Except a brand look-alike (phishing), weighted like an executable download (D137): alone at high
+# Except a brand look-alike (phishing), weighted like an executable download: alone at high
 # confidence 0.7 x 0.9 = 0.63, a medium case that gets the full analysis instead of a hidden low one.
 BRAND_LOOKALIKE_SEVERITY = 0.9
 # Neutral wording: titles describe what was seen, not intent (a legit upload is not "exfiltration").
@@ -95,7 +95,7 @@ def is_approved(host: str | None, approved: frozenset[str]) -> bool:
 
 def weighted_score(finding: Finding, approved_hosts: frozenset[str]) -> float:
     """The finding's score x the severity of its category (x0.4 for approved storage uploads;
-    a brand look-alike domain counts like delivery, 0.9: D137)."""
+    a brand look-alike domain counts like delivery, 0.9)."""
     weight = SEVERITY[CATEGORY_OF_KIND[finding.kind]]
     if finding.kind == "ai_suspicious_domain" and finding.details.get("label") == "brand_lookalike":
         weight = BRAND_LOOKALIKE_SEVERITY

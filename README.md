@@ -1,6 +1,6 @@
 # SOC Analyzer
 
-A small SOC console for Zscaler web proxy logs: upload a log file and get a company-wide
+A small SOC console for logs: upload a log file and get a company-wide
 dashboard, correlated **investigations** (cases with a workflow), per-user risk profiles, a
 searchable log explorer and a detection-rules catalog, with rule-based, statistical, ML and
 AI (Claude) detection and AI-written triage.
@@ -8,8 +8,10 @@ AI (Claude) detection and AI-written triage.
 Built as a full-stack take-home exercise: **FastAPI + PostgreSQL + DuckDB** on the backend,
 **React + TypeScript** on the frontend, everything runnable with one `docker compose` command.
 
-**Live demo:** <https://soc-analyzer-nh4n.onrender.com> (free tier: the first visit after a quiet
-period takes about a minute to wake up).
+**Live demo:** <https://soc-analyzer-nh4n.onrender.com>
+
+> **Note:** the demo runs on a free tier, so the first visit after a quiet period takes about a
+> minute to wake up.
 
 ---
 
@@ -384,7 +386,7 @@ samples/            synthetic logs + answer keys (+ edge_cases/)
 - Uploads go through the API; very large files without a `Content-Length` header are spooled to
   temporary disk before the size check. The production design uploads directly to cloud storage.
 - Only the fields above (and their listed aliases); other NSS feed templates may need mapping.
-- The runtime image is large (~660 MB before scikit-learn: PyArrow, DuckDB, and now NumPy/SciPy).
+- The runtime image is large (-660 MB before scikit-learn: PyArrow, DuckDB, and now NumPy/SciPy).
 
 **Roadmap**
 

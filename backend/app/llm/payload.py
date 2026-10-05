@@ -57,7 +57,7 @@ class StandIns:
     incidents: dict[str, int] = field(default_factory=dict)  # "incident_1" -> 42 (our id)
     # "incident_1" -> "jdoe's critical incident (Tue 22 Sep 14:05 UTC)": what an analyst understands
     incident_labels: dict[str, str] = field(default_factory=dict)
-    # "incident_1" -> {"host1": Search(...)}: the searches offered, so a reply can only pick these (D135)
+    # "incident_1" -> {"host1": Search(...)}: the searches offered, so a reply can only pick these
     searches: dict[str, dict[str, Search]] = field(default_factory=dict)
 
     def user(self, username: str) -> str:
@@ -96,7 +96,7 @@ def incident_menu(incident: IncidentInput) -> list[Search]:
 def build_payload(stats: dict[str, Any], incidents: list[IncidentInput],
                   overview: dict[str, Any] | None = None, triage: bool = False) -> tuple[dict[str, Any], StandIns]:
     """The JSON the model sees, plus the stand-in map to translate its reply back. `triage` adds each
-    incident's menu of searches (D135), so the model can pick next steps only from it."""
+    incident's menu of searches, so the model can pick next steps only from it."""
     stand_ins = StandIns()
     shown = sorted((i for i in incidents if i.priority in SENT_PRIORITIES),
                    key=lambda i: -i.priority_score)[:MAX_INCIDENTS]

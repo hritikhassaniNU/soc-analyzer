@@ -1,4 +1,4 @@
-"""Analysis results for one upload (computed by the worker; read-only here)."""
+"""Analysis results for one upload (computed by the worker)"""
 
 import base64
 import binascii
@@ -141,14 +141,13 @@ class EventOut(BaseModel):
     device_os: str | None
     rule_hits: list[str]
     rule_max_score: float
-    # Kinds of statistical/ML findings whose time window contains this event (same user), e.g.
+    # Kinds of statistical/ML findings whose time window contains this event, e.g.
     # ["beaconing", "off_hours"]. Rule hits are line-level (rule_hits); these are window-level.
     windows: list[str] = []
 
 
 WINDOW_SOURCES = ("stat", "ml", "ai")
 # Findings about specific destinations: only events to those hosts are "inside" them (otherwise
-# jdoe's normal google.com browsing during the 8-hour beacon would be badged "Beaconing").
 # Bursts, unusual hours and large uploads are about ALL the user's activity in the window.
 HOST_KEYS = {"beaconing": "host", "rare_domain": "domains", "ai_suspicious_domain": "host"}  # kind -> details key
 
@@ -205,7 +204,7 @@ def _utc(value: datetime | None) -> datetime | None:
 
 
 LineSeverity = Literal["critical", "high", "medium", "low", "none"]
-# Sources checkboxes (D99): "rule:<name>" (the line matched that rule) or "window:stat|ml" (the line
+# Sources checkboxes: "rule:<name>" (the line matched that rule) or "window:stat|ml" (the line
 # sits inside a statistical / ML finding's window). Several are OR-ed.
 SOURCE_VALUES = tuple(f"rule:{name}" for name in RULE_NAMES) + ("window:stat", "window:ml", "window:ai")
 SourceValue = Literal[SOURCE_VALUES]  # type: ignore[valid-type]
@@ -224,12 +223,12 @@ class EventFilterParams:
     in_window: bool = False
     start: datetime | None = None
     end: datetime | None = None
-    # Filter bar (D83): one search box, severity, detection source, "anomaly only".
+    # Filter bar: one search box, severity, detection source, "anomaly only".
     q: Annotated[str | None, Query(max_length=200)] = None
     min_score: Annotated[float | None, Query(ge=0, le=1)] = None
     window_source: Literal["stat", "ml", "ai"] | None = None
     anomalous: bool = False
-    # Severity checkboxes (D88): bands of the line's highest rule score, OR-ed (?severity=a&severity=b).
+    # Severity checkboxes: bands of the line's highest rule score
     severity: Annotated[list[LineSeverity] | None, Query()] = None
     source: Annotated[list[SourceValue] | None, Query()] = None
 
@@ -267,7 +266,7 @@ def _filtered_events(upload_id: int, f: EventFilterParams, *, with_severity: boo
     if flagged:
         query = query.where(func.cardinality(Event.rule_hits) > 0)
     if rule:
-        query = query.where(Event.rule_hits.contains([rule]))  # Postgres: rule_hits @> ARRAY[rule]
+        query = query.where(Event.rule_hits.contains([rule]))
     def inside_window(sources: tuple[str, ...]):
         # Inside some stat/ML finding's window for the same user. EXISTS per event row, served by
         # the anomalies (upload_id, username, window_start) index.
@@ -320,7 +319,7 @@ class HistogramPoint(BaseModel):
 
 
 class EventHistogram(BaseModel):
-    bucket_minutes: int  # 1/5/15/60/360/1440: the smallest that keeps <= 200 bars (D123)
+    bucket_minutes: int  # 1/5/15/60/360/1440: the smallest that keeps <= 200 bars
     points: list[HistogramPoint]  # gap-filled across the time filter (or the matching events)
 
 
@@ -331,7 +330,7 @@ BIN_ORIGIN = datetime(2000, 1, 1, tzinfo=UTC)
 
 def _bucket_minutes(span: timedelta) -> int:
     """Smallest bucket that keeps the chart under MAX_BUCKETS bars: 1 h -> 1 min, 1 day -> 15 min,
-    a week -> 1 h, a month -> 6 h (D123: zooming in gets finer bars instead of one fat one)."""
+    a week -> 1 h, a month -> 6 h (zooming in gets finer bars instead of one fat one)."""
     for minutes in BUCKET_CHOICES:
         if span / timedelta(minutes=minutes) <= MAX_BUCKETS:
             return minutes
@@ -343,7 +342,7 @@ def events_histogram(
     upload_id: int, user: CurrentUser, db: Annotated[Session, Depends(get_db)],
     filters: Annotated[EventFilterParams, Depends()],
 ) -> EventHistogram:
-    """Events over time for the current filters (D118): the Logs chart above the table. The range is
+    """Events over time for the current filters: the Logs chart above the table. The range is
     the time filter when set (so a zoom shows the whole zoomed window), else the matching events'."""
     _upload_or_404(db, upload_id)
     rows = _filtered_events(upload_id, filters).subquery()
@@ -399,7 +398,7 @@ def list_events(
     offset: Annotated[int | None, Query(ge=0, le=10_000_000)] = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> EventPage:
-    """Log lines in time order, filtered (all filters AND-ed). Two ways to page (D86):
+    """Log lines in time order, filtered (all filters AND-ed). Two ways to page:
     - `cursor` (KEYSET): `(ts, line_no) > cursor` uses the (ts, line_no) index, so Next/Previous
       are equally fast at any depth. `line_no` breaks ties between events with the same timestamp,
       so no row is skipped or repeated at a page boundary.

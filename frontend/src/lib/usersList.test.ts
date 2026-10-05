@@ -47,7 +47,7 @@ describe('paginate', () => {
   })
 })
 
-describe('sort direction (D109)', () => {
+describe('sort direction', () => {
   it('flips with dir=asc and keeps users without a risk last', () => {
     const f = { severities: [], departments: [], openOnly: false, sort: 'risk' as const }
     expect(applyUserFilters(users, { ...f, dir: 'asc' }).map((x) => x.username)).toEqual(['esmith', 'amiller', 'jdoe', 'quiet'])

@@ -30,7 +30,7 @@ export function StatusBadge({ upload }: { upload: Upload }) {
         </div>
       )
     case 'done': // shown as "Scanned"; the API status stays 'done'
-      // Soft tints from the status tokens (D105), like the Failed badge: calm, not loud.
+      // Soft tints from the status tokens, like the Failed badge: calm, not loud.
       return <Badge className="bg-status-success/15 text-status-success">Scanned</Badge>
     default:
       return <Badge variant="destructive">Failed</Badge>
@@ -39,8 +39,8 @@ export function StatusBadge({ upload }: { upload: Upload }) {
 
 export default function UploadsTable() {
   const uploads = useUploads() // polls every 2 s while anything is queued/processing
-  const [params, setParams] = useSearchParams() // ?page= (25 per page, like every list: D95)
-  const f = uploadFiltersFrom(params) // ?q=&status=&format= (D100)
+  const [params, setParams] = useSearchParams() // ?page= (25 per page, like every list)
+  const f = uploadFiltersFrom(params) // ?q=&status=&format=
   const [search, setSearch] = useState(f.q)
 
   function set(key: string, value: string) {
@@ -72,7 +72,7 @@ export default function UploadsTable() {
 
   const all = uploads.data
   const shown = applyUploadFilters(all, f)
-  // Sorting (D111): default newest upload first (the server's order).
+  // Sorting: default newest upload first (the server's order).
   const sorting = sortFrom(params, ['uploaded', 'lines'] as const)
   const sorted = sorting.sort === 'lines' ? sortRows(shown, (u) => u.line_count, sorting.dir, (a, b) => b.id - a.id)
     : sorting.dir === 'asc' ? [...shown].reverse() : shown

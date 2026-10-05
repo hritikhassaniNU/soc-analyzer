@@ -10,7 +10,7 @@ const when = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric'
 const dateLabel = (u: Upload) => when.format(new Date(u.created_at))
 
 /**
- * Which completed upload Logs shows: a searchable list (D89) instead of a native select, which
+ * Which completed upload Logs shows: a searchable list instead of a native select, which
  * can't hold a search box. Type to filter (id, name, format, date), arrows to move, Enter to pick,
  * Escape to close. ARIA combobox + listbox, so screen readers announce the active option.
  */

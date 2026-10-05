@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 
 const toggle = <T,>(list: readonly T[], value: T): T[] => list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 
-/** Everyone seen in the logs (D84): severity chips with counts, department and open-case filters,
+/** Everyone seen in the logs: severity chips with counts, department and open-case filters,
  *  sortable columns, and rows that say why a user is risky. Every filter lives in the URL. */
 export default function UsersPage() {
   const [params, setParams] = useSearchParams()
@@ -38,7 +38,7 @@ export default function UsersPage() {
     setParams(next)
   }
 
-  // Same column again flips the direction; a new column starts highest first (D109).
+  // Same column again flips the direction; a new column starts highest first.
   function sortBy(key: SortKey) {
     const next = new URLSearchParams(params)
     next.delete('page')
@@ -83,7 +83,7 @@ export default function UsersPage() {
           <MultiSelect label="Department" allLabel="All departments" selected={f.departments}
                        options={departments.map((d) => ({ value: d, label: d, count: all.filter((u) => u.department === d).length }))}
                        onChange={(v) => setParam('dept', v.join(','))} />
-          {/* Segmented like Logs' "All events | Anomalies only" (D102). */}
+          {/* Segmented like Logs' "All events | Anomalies only". */}
           <div role="group" aria-label="Open cases" className="inline-flex rounded-lg border p-0.5">
             {([[false, 'All users'], [true, 'With open cases']] as const).map(([value, label]) => (
               <button key={label} type="button" aria-pressed={f.openOnly === value} onClick={() => setParam('open', value ? '1' : '')}
@@ -103,7 +103,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Follows every filter except department, which it sets (D121). */}
+      {/* Follows every filter except department, which it sets. */}
       {users.data && (
         <RiskByDepartment users={applyUserFilters(all, { ...f, departments: [] })} departments={f.departments} severities={f.severities}
                           onToggleDepartment={(d) => setParam('dept', toggle(f.departments, d).join(','))}
@@ -124,7 +124,7 @@ export default function UsersPage() {
                 <SortHeader label="Open cases" active={f.sort === 'open_cases'} dir={f.dir} onSort={() => sortBy('open_cases')} align="right" />
                 <SortHeader label="Events" active={f.sort === 'events'} dir={f.dir} onSort={() => sortBy('events')} align="right" />
                 <SortHeader label="Last seen (UTC)" active={f.sort === 'last_seen'} dir={f.dir} onSort={() => sortBy('last_seen')} />
-                {/* Last and w-full: takes the spare width, so short reasons leave no gap mid-row (D104). */}
+                {/* Last and w-full: takes the spare width, so short reasons leave no gap mid-row. */}
                 <TableHead className="w-full">Why</TableHead>
               </TableRow>
             </TableHeader>

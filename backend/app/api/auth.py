@@ -115,7 +115,7 @@ def logout(
         delete_session(db, token)  # server-side revocation: the token is dead even if copied
     response.delete_cookie(
         key=SESSION_COOKIE,
-        path="/",  # must match the attributes used when setting it
+        path="/",
         httponly=True,
         samesite="lax",
         secure=get_settings().cookie_secure,

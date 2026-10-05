@@ -7,7 +7,7 @@ import { PRIORITY_META, PRIORITY_ORDER, SEVERITY_COLORS } from '@/lib/incidents'
 const AXIS_TICK = { fill: 'var(--muted-foreground)', fontSize: 12 }
 const dayLabel = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
-/** Cases per day (by when they occurred, UTC), stacked by severity, for the CURRENT filters (D118).
+/** Cases per day (by when they occurred, UTC), stacked by severity, for the CURRENT filters.
  *  Clicking a day filters the queue to it. Legend names every color (never color alone). */
 export default function CasesPerDay({ cases, selected, onSelect, severities, onToggleSeverity }: {
   cases: Investigation[]; selected: string | null; onSelect: (day: string | null) => void
@@ -33,7 +33,7 @@ export default function CasesPerDay({ cases, selected, onSelect, severities, onT
       <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
         <h2 className="label-caps">Cases per day (UTC)</h2>
         {PRIORITY_ORDER.map((p) => (
-          // Legend = severity filter (D120): same URL state as the Severity dropdown.
+          // Legend = severity filter: same URL state as the Severity dropdown.
           <button key={p} type="button" aria-pressed={severities.includes(p)} onClick={() => onToggleSeverity(p)}
                   title={severities.includes(p) ? `Remove the ${PRIORITY_META[p].label} filter` : `Show only ${PRIORITY_META[p].label}`}
                   className={cn('inline-flex items-center gap-1.5 rounded px-1 text-xs text-muted-foreground hover:text-foreground',

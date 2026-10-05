@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-5-5"
     llm_timeout_seconds: float = 30.0  # per-upload summary in the worker (nobody is waiting on it)
     # On-demand analyses (dashboard, user profile): an analyst clicked and waits; company-wide input
-    # is bigger and the model thinks first, so 30 s cut it off into the template (D79).
+    # is bigger and the model thinks first, so 30 s cut it off into the template.
     llm_review_timeout_seconds: float = 90.0
 
     # Worker log format: "text" (readable) or "json" (one object per line, for Cloud Logging).

@@ -197,7 +197,7 @@ def test_clean_week_has_no_bursts_or_off_hours(tmp_path, seed):
 
     assert [f for f in findings if f.kind != "large_upload"] == []
     # Known, documented limit: legitimate 50-150 MB uploads to company storage ARE statistically
-    # unusual. Telling them apart needs context (destination, time, client): correlation, step 19.
+    # unusual. Telling them apart needs context (destination, time, client): that is correlation's job.
     legit = next(b for b in generator.benign.values() if b.kind == "legit_large_upload")
     for finding in findings:
         assert finding.username in legit.username.split(",")

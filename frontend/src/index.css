@@ -6,7 +6,7 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    /* CrowdStrike Falcon's font stacks (falcon-styles tokens/system.json, D77): the OS UI font, no download. */
+    /* CrowdStrike Falcon's font stacks (falcon-styles tokens/system.json): the OS UI font, no download. */
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono: Consolas, Menlo, Monaco, Courier, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -68,22 +68,22 @@
   --series-3: #1baf7a;   /* aqua: < 3:1 on light, so always with legend + table view */
   --viz-grid: #dddddf;   /* hairline gridlines */
   --viz-axis: #b8b7bd;   /* baseline / axis */
-  /* App navigation: Falcon's graphite panel in BOTH modes (D76), so the same values in .dark */
+  /* App navigation: Falcon's graphite panel in BOTH modes, so the same values in .dark */
   --nav-bg: #161618;
   --nav-fg: #f7f7f8;
   --nav-muted: #b8b7bd;      /* 9.1:1 on --nav-bg, 7.0:1 on --nav-active-bg (WCAG AA: 4.5) */
   --nav-active-bg: #2c2c30;
   --nav-accent: #8cb0fd;     /* Falcon primary: "Analyzer", the active bar (8.4:1 on --nav-bg) */
   /* Incident priority (status colors: reserved for priority, always with an icon + label) */
-  /* CrowdStrike Falcon's published severity colors (falcon-styles tokens, D76). Validator: critical vs
+  /* CrowdStrike Falcon's published severity colors (falcon-styles tokens). Validator: critical vs
      high are close (deutan ΔE 3.7 light / 7.5 dark), so every use pairs color with icon shape + word. */
   --priority-critical: #e9181f;
   --priority-high: #de5d29;
   --priority-medium: #cf8f0f;
   --priority-low: #2d865a;    /* green: 4.5:1 on white */
-  --status-success: #2d865a;  /* Falcon success: the Resolved tick (D97); shape + word tell it from Low */
-  --status-open: #2a67ed;     /* Falcon info blue (D103) */
-  --status-investigating: #7c3aed; /* violet: used nowhere else (D103) */
+  --status-success: #2d865a;  /* Falcon success: the Resolved tick; shape + word tell it from Low */
+  --status-open: #2a67ed;     /* Falcon info blue */
+  --status-investigating: #7c3aed; /* violet: used nowhere else */
     --background: #f7f7f8;
     --foreground: #161618;
     --card: #ffffff;
@@ -175,7 +175,7 @@
     @apply font-sans;
     }
 }
-/* One type scale for every page (D77). Use these instead of ad-hoc sizes/weights. */
+/* One type scale for every page. Use these instead of ad-hoc sizes/weights. */
 @layer components {
   .page-title { @apply text-2xl leading-tight font-semibold tracking-tight; }    /* 24px: one per page */
   .page-subtitle { @apply text-sm text-muted-foreground; }

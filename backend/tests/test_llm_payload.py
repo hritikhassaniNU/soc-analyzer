@@ -72,14 +72,14 @@ def test_template_summary_and_steps():
 
     assert narrative.source == "template"
     assert narrative.summary.startswith("2 incidents need attention (1 critical, 1 medium). Most serious: jdoe")
-    # Every incident gets the template text, low ones too (D137); the summary counts only medium+.
+    # Every incident gets the template text, low ones too; the summary counts only medium+.
     assert set(narrative.incidents) == {1, 2, 3}
     assert narrative.incidents[3].narrative.startswith("pwilson, ") and narrative.incidents[3].source == "template"
     jdoe = narrative.incidents[1]
     assert jdoe.next_steps[0].startswith("Isolate the device")  # strongest finding (beaconing) first
     assert jdoe.next_questions[0] == "Which process on the device makes these regular connections?"
     assert len(jdoe.next_questions) == 2  # one per category present (C2, executable download)
-    assert jdoe.narrative.startswith("jdoe, ") and jdoe.narrative.endswith("Also: executable download.")  # compact (D116)
+    assert jdoe.narrative.startswith("jdoe, ") and jdoe.narrative.endswith("Also: executable download.")  # compact
     assert len(jdoe.narrative) <= 320
 
 

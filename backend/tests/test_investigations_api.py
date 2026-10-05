@@ -75,14 +75,14 @@ def test_case_detail_has_everything_the_tabs_need(logged_in, storage, weeks):
 
     assert d["why_flagged"].startswith("jdoe") and d["narrative_source"] == "template"
     assert d["next_steps"] and 1 <= len(d["next_questions"]) <= 3
-    # D135: no AI verdict without Claude; default searches built from the evidence.
+    # No AI verdict without Claude; default searches built from the evidence.
     assert d["ai_assessment"] is None
     assert [s["id"] for s in d["searches"]] == ["flagged", "host1", "everyone_host1"]
     assert d["searches"][0]["username"] == "jdoe" and d["searches"][0]["anomalous"] is True
     assert d["searches"][2]["username"] is None and d["searches"][2]["host"] == d["searches"][1]["host"]
     parts = d["risk_breakdown"]
     counted = sum(p["counted"] for p in parts)
-    assert parts[0]["counted"] and d["risk"] == min(100, parts[0]["weight"] + 10 * (counted - 1))  # D40, capped
+    assert parts[0]["counted"] and d["risk"] == min(100, parts[0]["weight"] + 10 * (counted - 1))  # correlation formula, capped
     assert [p["weight"] for p in parts] == sorted((p["weight"] for p in parts), reverse=True)
     assert {s["label"] for s in d["detection_signals"]} == {p["label"] for p in parts}
     times = [e["window_start"] for e in d["evidence"]]

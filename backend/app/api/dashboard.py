@@ -94,7 +94,7 @@ class Kpis(BaseModel):
     events: int
     datasets: int  # distinct datasets among the completed uploads
     uploads: int  # completed uploads (copies included)
-    # Security overview tiles (D81)
+    # Security overview tiles
     findings: int  # detections (rule, statistical, ML) in the unique incidents
     findings_high: int  # of which scored high or critical (>= 0.75)
     open_cases: int  # unresolved cases (open + investigating), every priority
@@ -128,7 +128,7 @@ class Dashboard(BaseModel):
 
 
 def unique_incidents(db: Session) -> list[Incident]:
-    """One row per (user, window, title), from the NEWEST scan of each distinct dataset only (D72):
+    """One row per (user, window, title), from the NEWEST scan of each distinct dataset only:
     re-scanning a week (e.g. with a detector switched off) replaces its results instead of adding
     near-duplicate incidents next to the old ones."""
     identity = (Incident.username, Incident.start_ts, Incident.end_ts, Incident.title)
@@ -143,7 +143,7 @@ URGENT = ("critical", "high")
 
 
 def _overview(db: Session, incidents: list[Incident]) -> dict[str, Any]:
-    """The security-overview tile numbers (D81), all over the same unique incidents / datasets."""
+    """The security-overview tile numbers, all over the same unique incidents / datasets."""
     ids = [i.id for i in incidents]
     findings, findings_high = db.execute(
         select(func.count(), func.count().filter(Anomaly.score >= 0.75)).where(Anomaly.incident_id.in_(ids))
@@ -274,7 +274,7 @@ def get_dashboard(user: CurrentUser, db: Annotated[Session, Depends(get_db)]) ->
                 d["reason"], d["reason_score"] = DOMAIN_REASONS[kind], score
 
     # Users: their highest-scoring incident decides their rank and reason.
-    # Users at risk = their worst UNRESOLVED case, the same rule as the Users page and profiles (D74):
+    # Users at risk = their worst UNRESOLVED case, the same rule as the Users page and profiles:
     # once analysts resolve a user's cases, that user leaves this card (history stays on the profile).
     resolved = {(c.username, c.start_ts, c.end_ts, c.title)
                 for c in db.scalars(select(Case).where(Case.status == "resolved"))}

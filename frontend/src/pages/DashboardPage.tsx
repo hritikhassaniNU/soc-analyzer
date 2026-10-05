@@ -37,15 +37,15 @@ export default function DashboardPage() {
       )}
       {dashboard.data && dashboard.data.kpis.uploads > 0 && (
         <>
-          {/* Calm order (D130): numbers, one AI line, charts, what to work on, compact context. */}
+          {/* Calm order: numbers, one AI line, charts, what to work on, compact context. */}
           <KpiTiles kpis={dashboard.data.kpis} datasets={dashboard.data.datasets} />
           <AiReviewBanner />
-          {/* Stretch: both chart cards share one height, no black gap under the shorter one (D131). */}
+          {/* Stretch: both chart cards share one height, no black gap under the shorter one. */}
           <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
             <IncidentTimeline timeline={dashboard.data.timeline} />
             <RiskBreakdown severity={dashboard.data.severity} categories={dashboard.data.categories} />
           </div>
-          {/* Two balanced columns (D131): work queue + entities left, people right. */}
+          {/* Two balanced columns: work queue + entities left, people right. */}
           <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
             <div className="flex flex-col gap-6">
               <PriorityInvestigations incidents={dashboard.data.top_incidents} />

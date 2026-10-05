@@ -102,7 +102,7 @@ def test_the_gzip_json_sample_gives_the_same_analysis_as_the_csv_sample(client, 
 
     db_session.expire_all()
     assert result(gz_id) == result(csv_id)
-    assert result(gz_id)[0] == 17_686  # 17,679 + the D136 plants (2 look-alike + 5 msftconnecttest lines)
+    assert result(gz_id)[0] == 17_686  # 17,679 + the AI-detector plants (2 look-alike + 5 msftconnecttest lines)
 
 
 @pytest.fixture

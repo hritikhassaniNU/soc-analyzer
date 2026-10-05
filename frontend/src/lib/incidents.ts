@@ -12,7 +12,7 @@ export const PRIORITY_META: Record<Priority, { label: string; icon: LucideIcon; 
 
 export const PRIORITY_ORDER: Priority[] = ['critical', 'high', 'medium', 'low']
 
-/** Fill colors for severity in charts: the reserved priority colors (low = teal, D75). Never
+/** Fill colors for severity in charts: the reserved priority colors (low = teal). Never
  *  color alone: charts repeat every label with its number (legend, table view). */
 export const SEVERITY_COLORS: Record<Priority, string> = {
   critical: 'var(--priority-critical)',
@@ -86,7 +86,7 @@ export function severityOptions(counts: Partial<Record<string, number>>, extra?:
   ]
 }
 
-/** The severity a 0-100 risk falls in: the same cut-offs as the backend labels (D40). */
+/** The severity a 0-100 risk falls in: the same cut-offs as the backend labels. */
 export function priorityForRisk(risk: number): Priority {
   return risk >= 95 ? 'critical' : risk >= 75 ? 'high' : risk >= 45 ? 'medium' : 'low'
 }

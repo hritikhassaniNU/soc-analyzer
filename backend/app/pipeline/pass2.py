@@ -35,7 +35,7 @@ OWN_SOURCES = ("rule", "stat", "ml", "ai")  # anomaly sources this pass creates 
 def cached_domain_classifier(
     session_factory: Callable[[], Session], client: MessagesClient | None = None,
 ) -> Classifier | None:
-    """The AI domain classifier (D136) behind the domain_verdicts cache: only hosts never classified
+    """The AI domain classifier behind the domain_verdicts cache: only hosts never classified
     before are sent to Claude, and every new answer is stored. None without an API key (and no test
     client): the AI detector then doesn't run."""
     settings = get_settings()

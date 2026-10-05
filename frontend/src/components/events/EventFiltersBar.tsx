@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 const SELECT = 'h-9 rounded-lg border border-input bg-transparent px-2 text-sm dark:bg-input/30'
 
 /**
- * Filter bar (D83), like a SOC log search: one search box (user, IP, host, category, device),
+ * Filter bar, like a SOC log search: one search box (user, IP, host, category, device),
  * a time range relative to the dataset's own dates, detection source, action and
  * "anomaly only". Dropdowns and toggles apply at once; the search applies on Enter. Exact filters
  * from drill-down links (user, host, category) show as removable chips. Remounted (via `key`)
@@ -71,7 +71,7 @@ export default function EventFiltersBar({ uploadId, filters, onApply }: {
   // Links from the dashboard ("Flagged" counts) open Logs with ?flagged=1: shown as a chip.
   const any = Object.keys(filters).length > 0
 
-  // One row of filters (D126); custom range and value chips only appear when used.
+  // One row of filters; custom range and value chips only appear when used.
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -86,7 +86,7 @@ export default function EventFiltersBar({ uploadId, filters, onApply }: {
           {(Object.keys(presets) as TimePreset[]).map((p) => <option key={p} value={p}>{presets[p].label}</option>)}
           <option value="custom">Custom range…</option>
         </select>
-        {/* Sources (D99): checked sources are OR-ed (a matched rule, or inside a finding window). */}
+        {/* Sources: checked sources are OR-ed (a matched rule, or inside a finding window). */}
         <MultiSelect label="Sources" allLabel="All sources" selected={filters.source ?? []}
                      options={SOURCE_VALUES.map((v) => ({ value: v, label: SOURCE_LABELS[v] }))}
                      onChange={(v) => apply({ source: v.length ? (v as EventFilters['source']) : undefined })} />
@@ -100,7 +100,7 @@ export default function EventFiltersBar({ uploadId, filters, onApply }: {
             </button>
           ))}
         </div>
-        {/* Segmented like Action (D102): each side says what the table shows; "All" is no filter. */}
+        {/* Segmented like Action: each side says what the table shows; "All" is no filter. */}
         <div role="group" aria-label="Anomalies" title="Anomalies: lines that matched a rule or sit inside a finding's time window"
              className="inline-flex rounded-lg border p-0.5">
           {([[false, 'All events'], [true, 'Anomalies only']] as const).map(([value, label]) => (
@@ -151,7 +151,7 @@ export default function EventFiltersBar({ uploadId, filters, onApply }: {
         </div>
       )}
 
-      {/* Always say what is being searched (D106). */}
+      {/* Always say what is being searched. */}
       <p className="meta" aria-live="polite">
         Searching{' '}
         {filters.start || filters.end ? (

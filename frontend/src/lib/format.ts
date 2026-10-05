@@ -42,7 +42,7 @@ export function formatPercent(fraction: number): string {
   return `${(fraction * 100).toFixed(fraction < 0.1 ? 1 : 0)}%`
 }
 
-// Date and time formatted separately and joined with a space: no comma between them (D119).
+// Date and time formatted separately and joined with a space: no comma between them.
 const localDate = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 const localTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
 
@@ -55,7 +55,7 @@ export function formatDateTime(iso: string): string {
 const utcDate = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })
 const utcTime = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' })
 
-/** "Oct 6, 2026 14:05 UTC": times FROM THE LOGS, always UTC like the events table and charts (D93). */
+/** "Oct 6, 2026 14:05 UTC": times FROM THE LOGS, always UTC like the events table and charts. */
 export function formatUtc(iso: string): string {
   const d = new Date(iso)
   return `${utcDate.format(d)} ${utcTime.format(d)} UTC`
@@ -67,7 +67,7 @@ export function capitalize(text: string): string {
 }
 
 /** A chart bucket in words: 1 -> "minute", 15 -> "15 minutes", 60 -> "hour", 360 -> "6 hours",
- *  1440 -> "day" (D125; never "0.0166 hours"). */
+ *  1440 -> "day" (never "0.0166 hours"). */
 export function bucketLabel(minutes: number): string {
   if (minutes % 1440 === 0) return minutes === 1440 ? 'day' : `${minutes / 1440} days`
   if (minutes % 60 === 0) return minutes === 60 ? 'hour' : `${minutes / 60} hours`

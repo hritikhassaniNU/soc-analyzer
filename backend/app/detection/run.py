@@ -28,7 +28,7 @@ def detect(
 ) -> Detection:
     """`disabled`: detector kinds switched off by an analyst (catalog.py); their findings are dropped
     before correlation, so incidents are built as if they didn't exist. `classify_domains`: the AI
-    domain classifier (D136); None (no API key, tests) = that detector doesn't run."""
+    domain classifier; None (no API key, tests) = that detector doesn't run."""
     findings = ([("rule", f) for f in group_rule_hits(con, parquet, disabled)]
                 + [("stat", f) for f in detect_statistical(con, parquet, log_tz) if f.kind not in disabled])
     if classify_domains is not None and "ai_suspicious_domain" not in disabled:

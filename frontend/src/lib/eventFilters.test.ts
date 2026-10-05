@@ -62,11 +62,11 @@ describe('drillDownParams', () => {
   })
 })
 
-describe('filter bar parameters (D83)', () => {
+describe('filter bar parameters', () => {
   it('round-trips search, severity, source and anomaly only', () => {
     const params = new URLSearchParams('q=jdoe&severity=critical&window=stat&anomalous=1')
     const filters = filtersFromParams(params)
-    // ?severity= is ignored on Logs (D95); the old ?window= becomes a checked source (D99).
+    // ?severity= is ignored on Logs; the old ?window= becomes a checked source.
     expect(filters).toEqual({ q: 'jdoe', source: ['window:stat'], anomalous: true })
     expect(paramsWithFilters(new URLSearchParams(), filters).toString()).toBe('q=jdoe&sources=window%3Astat&anomalous=1')
   })
@@ -75,7 +75,7 @@ describe('filter bar parameters (D83)', () => {
     expect(filtersFromParams(new URLSearchParams('severity=extreme&window=rules'))).toEqual({})
   })
 
-  it('counts presets back from now, end exclusive (D112)', () => {
+  it('counts presets back from now, end exclusive', () => {
     const p = timePresets(Date.parse('2026-09-27T21:59:30Z'))
     expect(p.last_24h).toMatchObject({ label: 'Last 24 hours', start: '2026-09-26T22:00:00Z', end: '2026-09-27T22:00:00Z' })
     expect(p.last_3d).toMatchObject({ start: '2026-09-24T22:00:00Z', end: '2026-09-27T22:00:00Z' })
@@ -83,7 +83,7 @@ describe('filter bar parameters (D83)', () => {
   })
 })
 
-describe('sources (D99)', () => {
+describe('sources', () => {
   it('reads the checkbox list and folds old ?rule / ?in_window links into it', () => {
     expect(filtersFromParams(new URLSearchParams('sources=window:ml,rule:scripted_client,bogus')).source)
       .toEqual(['rule:scripted_client', 'window:ml'])

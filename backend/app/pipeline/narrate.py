@@ -50,8 +50,8 @@ def run_narrative(
             "generated_at": datetime.now(UTC).isoformat(),
             "incidents": {str(id): {"narrative": n.narrative, "next_steps": n.next_steps,
                                     "next_questions": n.next_questions,
-                                    "assessment": n.assessment, "searches": n.searches,  # D135
-                                    "source": n.source}  # D137: per incident
+                                    "assessment": n.assessment, "searches": n.searches,
+                                    "source": n.source}  # who wrote this incident's text
                           for id, n in narrative.incidents.items()},
         }
         with session_factory() as db:

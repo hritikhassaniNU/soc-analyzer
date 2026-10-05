@@ -38,8 +38,8 @@ DEFAULT_SEEDS = (42, 7, 123, 2026, 99)
 PRIORITIES = ("critical", "high", "medium", "low")
 RANK = {p: i for i, p in enumerate(PRIORITIES)}  # lower = worse
 APPROVED = parse_hosts(Settings.model_fields["approved_upload_hosts"].default)  # no DB/env needed
-# Plants only the AI domain classifier can see (D136): evaluated only when a classifier is given,
-# and judged by "an incident covers it" (any priority; a brand look-alike alone is medium, D137).
+# Plants only the AI domain classifier can see: evaluated only when a classifier is given,
+# and judged by "an incident covers it" (any priority; a brand look-alike alone is medium).
 AI_ONLY_KINDS = {"lookalike_domain"}
 
 

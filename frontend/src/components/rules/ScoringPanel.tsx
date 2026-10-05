@@ -2,7 +2,7 @@ import type { RulesCatalog } from '@/api/rules'
 import { capitalize } from '@/lib/format'
 import { PRIORITY_META } from '@/lib/incidents'
 
-/** How findings become a case's risk: the correlation formula with the real numbers (D40). */
+/** How findings become a case's risk: the correlation formula with the real numbers. */
 export default function ScoringPanel({ scoring }: { scoring: RulesCatalog['scoring'] }) {
   const pct = (x: number) => Math.round(x * 100)
   return (
