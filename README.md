@@ -175,7 +175,7 @@ following documented fields (names modeled on NSS web log fields), defined in
                                                     pass 2: DuckDB on the Parquet ──► summary + timeline + top lists
 ```
 
-Key points (details and alternatives in [`docs/DECISIONS.md`](docs/DECISIONS.md)):
+Key points:
 
 - **One container image, one origin.** The React build is served by FastAPI, so the session
   cookie works without CORS. The same image runs as `api`, `worker` and `migrate`.
@@ -226,7 +226,7 @@ analysts' true/false-positive feedback.
 | Machine learning (layer 4) | IsolationForest (unsupervised) finds user-hours with unusual combinations of behavior. | Per-upload, in-process; attached as evidence only (measured to add no detections on the synthetic data). |
 | AI domain classifier (layer 5) | **Detects:** labels rare domain names (generated, brand look-alike, anonymous file sharing, benign) with confidence and a reason. | Sent: only domain names, their URL categories and request/user counts, under stand-in ids; **no** usernames or IPs. Domain names are attacker-chosen: cleaned, passed as JSON inside tags marked untrusted, answer constrained to a fixed schema and matched back by id. Low weight (0.6), cached per domain, one call per scan for new domains only. Any error → the detector adds nothing. |
 | Claude analysis (layer 6) | Writes the summary, per-incident narratives, next steps, questions, a triage suggestion (worded, never a percentage; pre-selects the Resolve verdict, the analyst decides) and picks next-step searches **by id from our menu** (it can't invent a filter). Default model `claude-sonnet-5-5` (`ANTHROPIC_MODEL`). | Sent: counts and the top 10 medium+ incidents' findings (kinds, scores, times, reasons). **Never** raw log lines, IP addresses or real usernames (stand-ins `user_1`… mapped back after). Log-derived text is cleaned and passed as JSON inside tags the system prompt marks as untrusted data; the answer must use a fixed tool schema, may only refer to incidents we sent, and can't change any priority or evidence. Any API error or unusable answer → template. |
-| Building this project | Written with an AI coding assistant (Claude Code). Design decisions, alternatives and measurements were reviewed and decided by the author; see `docs/DECISIONS.md`. | Every change was reviewed and tested; the decision log records what was chosen and why. |
+| Building this project | Written with an AI coding assistant (Claude Code). Design decisions, alternatives and measurements were reviewed and decided by the author. | Every change was reviewed and tested. |
 
 **Turning Claude on:** add `ANTHROPIC_API_KEY=…` to the root `.env` (gitignored, not copied into
 the image; `chmod 600 .env`), then `docker compose up -d`. Per upload: one call for the analysis
@@ -259,7 +259,7 @@ the same check on every `pytest`, so a threshold change that breaks it fails the
   is a **medium** case (look-alike weight 0.9); CI runs these checks with a fake model.
 
 **What this does and doesn't show.** The data is synthetic, and the thresholds were chosen by
-measuring on it (each choice and the measurement behind it is in `docs/DECISIONS.md`). It shows the
+measuring on it. It shows the
 system finds what was planted and stays quiet on look-alikes designed to fool it; it can't show
 real-world precision. Known blind spots: command-and-control hidden in popular services (prevalence
 makes it look normal), beacons with heavy random jitter, random domain names made only of letters
@@ -339,7 +339,6 @@ frontend/
   src/components/   dashboard, events table, upload form, layout
   src/pages/        login, uploads, upload detail (Overview / Events)
 samples/            synthetic logs + answer keys (+ edge_cases/)
-docs/DECISIONS.md   every significant decision: choice, alternatives, reasoning
 ```
 
 ---

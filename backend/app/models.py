@@ -228,7 +228,7 @@ class Incident(Base):
     """A user's correlated anomalies close together in time: what an analyst triages.
 
     priority_score (0-1) = strongest severity-weighted finding + a bonus for each other category
-    of evidence (corroboration). A ranking signal, not a probability. See docs/DECISIONS.md.
+    of evidence (corroboration). A ranking signal, not a probability.
     """
 
     __tablename__ = "incidents"

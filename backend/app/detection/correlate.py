@@ -15,7 +15,7 @@ time (jdoe: executable download -> beaconing -> off-hours).
   "a script ran fast", not a breach. Categories, not kinds, earn the bonus, so two findings that
   measure the same thing (two off-hours episodes) don't corroborate each other.
 - Large uploads to approved company storage are weighted x0.4: down-ranked, never hidden.
-- A ranking signal, not a probability (see docs/DECISIONS.md).
+- A ranking signal, not a probability.
 """
 
 from collections.abc import Sequence

@@ -1,6 +1,6 @@
 """Pass 1: stream the raw upload through the parser into Postgres (COPY) and Parquet.
 
-Transactions (see docs/DECISIONS.md):
+Transactions:
   1. Short: drop any old partition and create a fresh one. CREATE ... PARTITION OF takes a
      strong lock on the parent `events` table, so it is committed immediately.
   2. Data: COPY every event into the partition and save the parse stats, all-or-nothing.

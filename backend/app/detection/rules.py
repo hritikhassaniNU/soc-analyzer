@@ -4,7 +4,7 @@ Each rule is a small function: event in, RuleHit (or None) out. They run inline 
 so they must be cheap (~3M calls for a 500 MB file).
 
 Scores are heuristic ranking signals in [0, 1] (how strong and reliable the signal is),
-NOT probabilities that the event is malicious. See docs/DECISIONS.md.
+NOT probabilities that the event is malicious.
 """
 
 import re
