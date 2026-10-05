@@ -16,3 +16,9 @@ data/
 .DS_Store
 .idea/
 .vscode/
+
+# Private notes, not committed for now (see ai/HOW_THIS_WAS_BUILT.md)
+ai/
+
+# Tool-specific local config (e.g. dev-server launch settings)
+.claude/

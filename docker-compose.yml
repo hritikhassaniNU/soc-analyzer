@@ -1,3 +1,14 @@
+# Shared settings for every service built from our image (migrate, api, worker).
+# YAML anchor (&) defined once, reused below with `<<: *backend-env`.
+x-backend-env: &backend-env
+  # Inside Compose the database host is the service name `db` (port 5432, not 5433).
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+  STORAGE_DIR: /data
+  # Optional Claude summaries: set ANTHROPIC_API_KEY in the root .env (empty = template summary).
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5-5}
+  LOG_FORMAT: ${LOG_FORMAT:-text}  # json on GCP (Cloud Logging)
+
 services:
   db:
     image: postgres:17
@@ -19,13 +30,13 @@ services:
       retries: 10
 
   # One-shot "prepare the database": apply Alembic migrations, then seed analyst accounts.
-  # api (and later worker) wait for it, so they never start against an old schema
+  # api and worker wait for it, so they never start against an old schema
   # and never race each other migrating.
   migrate:
     build: .
     command: ["sh", "-c", "alembic upgrade head && python -m app.seed_users"]
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      <<: *backend-env
       SEED_USERS: ${SEED_USERS}
     depends_on:
       db:
@@ -35,13 +46,36 @@ services:
   api:
     build: .
     environment:
-      # Inside Compose the database host is the service name `db` (port 5432, not 5433).
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      <<: *backend-env
+    volumes:
+      - uploads:/data                # uploaded files, shared with the worker
     ports:
       - "8000:8000"
     depends_on:
       migrate:
         condition: service_completed_successfully   # only after migrations exit 0
+    healthcheck:
+      # Liveness: is Uvicorn answering? (python urllib: the slim image has no curl)
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s   # boot time: failures here don't count
+
+  # Same image, different command: claims queued uploads and analyzes them.
+  # Scale out with: docker compose up -d --scale worker=3  (SKIP LOCKED prevents double work)
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment:
+      <<: *backend-env
+    volumes:
+      - uploads:/data                # reads raw files, writes Parquet
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped          # come back after a crash
 
 volumes:
   pgdata:
+  uploads:
