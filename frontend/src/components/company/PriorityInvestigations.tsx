@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
+import { capitalizeEach } from '@/lib/format'
 import type { DashboardIncident } from '@/api/dashboard'
 import RiskMeter from '@/components/RiskMeter'
 import { PriorityLabel } from '@/components/incidents/IncidentsPanel'
@@ -26,7 +27,7 @@ export default function PriorityInvestigations({ incidents }: { incidents: Dashb
                   <span className="min-w-0 flex-1 text-sm">
                     <span className="font-medium">{i.username}</span>{' '}
                     <span className="text-muted-foreground">· {formatWindow(i.start_ts, i.end_ts)} UTC</span>
-                    <span className="block text-muted-foreground">{i.title} · {i.findings} finding{i.findings === 1 ? '' : 's'}</span>
+                    <span className="block text-muted-foreground">{capitalizeEach(i.title)} · {i.findings} finding{i.findings === 1 ? '' : 's'}</span>
                   </span>
                   <span className="text-sm"><RiskMeter risk={Math.round(i.priority_score * 100)} priority={i.priority} width="w-12" /></span>
                   <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />

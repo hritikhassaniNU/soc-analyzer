@@ -17,28 +17,49 @@ Built as a full-stack take-home exercise: **FastAPI + PostgreSQL + DuckDB** on t
 
 ## Quick start
 
-**Prerequisite:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (running).
+**Prerequisite:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), installed and running.
+
+**1. Clone the repository**
 
 ```bash
-git clone <this-repo> && cd <this-repo>
-cp .env.example .env                 # demo settings; review before any shared deployment
-docker compose up -d --build --wait  # builds the image, migrates the DB, seeds the demo user
+git clone https://github.com/hritikhassaniNU/soc-analyzer.git
+cd soc-analyzer
 ```
 
-The first build downloads base images and dependencies, so it takes a few minutes; later
-starts take seconds.
+**2. Create your settings file** (demo values; review them before any shared deployment)
 
-Then open **http://localhost:8000** and sign in:
+```bash
+cp .env.example .env
+```
+
+On Windows (PowerShell or cmd): `copy .env.example .env`
+
+**3. Optional: turn on the AI features.** Open `.env` and set `ANTHROPIC_API_KEY=` to your Anthropic
+API key. Without a key everything works, but summaries are written by a built-in template and the
+AI domain detector is skipped (see *AI usage* below).
+
+**4. Build and start**
+
+```bash
+docker compose up -d --build --wait
+```
+
+This builds the image, creates the database tables and the demo user. The first build downloads
+base images and dependencies, so it takes a few minutes; later starts take seconds. If port 8000
+or 5433 is already in use, stop the other app or change the port in `docker-compose.yml`.
+
+**5. Sign in** at **http://localhost:8000**
 
 | Username | Password |
 |---|---|
 | `analyst` | `ChangeMe-Demo-123` |
 
 > **Demo login:** one shared analyst account (`SEED_USERS`), for demo purposes only; there is no
-> sign-up or single sign-on. The live demo uses its own password, shared on request.
+> sign-up or single sign-on. The live demo uses its own password, shared on request. AI analysis
+> (Claude summaries, case triage and the AI domain detector) needs `ANTHROPIC_API_KEY` (step 3).
 
-Go to **Upload Logs** and upload **`samples/demo_log.csv`**. It is analyzed in the background (a
-few seconds) and the row turns **Scanned**; click **Open**.
+**6. Upload a sample:** go to **Upload Logs** and upload **`samples/demo_log.csv`**. It is analyzed
+in the background (a few seconds) and the row turns **Scanned**; click **Open**.
 
 **Sample files** (synthetic logs from `backend/app/generator.py`):
 
@@ -46,10 +67,6 @@ few seconds) and the row turns **Scanned**; click **Open**.
 |---|---|
 | `samples/demo_log.csv` (1 MB) | **Start here.** One week, every attack scenario and innocent look-alike, little normal traffic, plus 9 deliberately broken lines (bad dates, wrong columns, an HTML/script and a prompt-injection line) |
 | `samples/all_log.csv` (2.1 MB) | The same scenarios with more normal traffic (fuller charts) |
-| `samples/edge_cases/zscaler_sample.csv` | A full week (30 users) with planted attacks; `.truth.json` is its answer key |
-| `samples/edge_cases/zscaler_sample.jsonl.gz` | The same week as gzip-compressed JSON lines |
-| `samples/edge_cases/zscaler_clean.csv` | A week with **no** attacks, only innocent look-alikes |
-| `samples/edge_cases/zscaler_week2.log`, `zscaler_week3.txt` | Two more weeks (CSV, and JSON lines with NSS timestamps) |
 | `samples/edge_cases/bad_lines_with_html.csv` | Mostly malformed lines: shows bad-line reporting and safe rendering |
 
 | Task | Command |
@@ -88,9 +105,7 @@ not raise alarms. Upload `samples/demo_log.csv`, then:
 7. **Upload Logs → Details:** the 9 broken lines, counted and shown as plain text with the reason.
 
 With `ANTHROPIC_API_KEY` set, the demo also yields a **medium** case for a Microsoft look-alike
-phishing domain that only the AI detector sees. For contrast, upload
-`samples/edge_cases/zscaler_clean.csv`: no medium-or-higher incidents at all, only ~15 low ones
-kept for the record.
+phishing domain that only the AI detector sees.
 
 ---
 
@@ -178,8 +193,6 @@ following documented fields (names modeled on NSS web log fields), defined in
 - **Bad lines** (wrong column count, missing required field, bad number or timestamp, unknown
   action) are counted and sampled. A file is rejected if its first 1,000 lines are all invalid or
   more than half of its lines are.
-- **Samples:** `zscaler_sample.jsonl.gz` is the same week as `zscaler_sample.csv` as gzip-compressed
-  JSON lines (0.45 MB instead of 4.8 MB); it produces the same incidents (tested).
 - Generate more data: `cd backend && uv run python -m app.generator --out ../samples/my.csv`
   (`--format json`, `--clean`, `--days`, `--users`, `--seed`, `--target-mb`, `--header`, `--time-format nss`).
 
@@ -235,10 +248,11 @@ and findings are correlated into **incidents** an analyst can triage.
 | **3. Correlation** (`correlate.py`) | A user's findings within 24 h form an incident. Priority = strongest finding weighted by how serious its kind is, + 0.1 for each other kind of evidence that is meaningful on its own. Large uploads to approved company storage (`APPROVED_UPLOAD_HOSTS`) are ranked down, never hidden. | **Implemented** |
 | **4. Machine learning** (`ml.py`, scikit-learn) | IsolationForest on 9 per-user-hour features, each scaled to "how unusual for this user"; reports an hour only if it is isolated **and** at least two features are clearly unusual (a combination, not one extreme). **Evidence only:** measured on 5+5 generated weeks it flagged as many hours in attack-free weeks (19) as in attack weeks (20), all look-alikes or hours already in an incident, so an ML finding is kept only when it overlaps an existing incident, and never changes its priority. | **Implemented (evidence only)** |
 | **5. AI domain classifier** (`detection/ai_domains.py`, `llm/domains.py`) | **Claude** judges the names of rare domains (contacted by ≤ 2 users, ≤ 150 per scan): randomly generated, brand look-alike (e.g. `rnicrosoft-login.com`), anonymous file sharing, or likely benign, with low/medium/high confidence and a reason. Medium/high suspicious answers become findings in their own evidence category with a low weight (0.6): they corroborate other evidence but rarely raise a case alone. Exception: a brand look-alike (phishing) weighs 0.9, so one alone is a medium case. Answers are cached per domain. Only with `ANTHROPIC_API_KEY`; switchable on the Rules page. | **Implemented** |
-| **6. LLM analysis** (`backend/app/llm/`) | **Claude** writes an upload summary plus, per medium+ incident, a narrative, next steps, questions, a **triage suggestion** (likely malicious / likely benign / needs more evidence, with confidence in words) and **1–3 next-step searches** picked from a menu the backend builds from the evidence (shown as buttons that open Logs filtered). From pseudonymized findings only; labeled "AI-generated". Without `ANTHROPIC_API_KEY` a deterministic template writes the same sections, without a verdict, with default searches. | **Implemented** |
+| **6. LLM analysis** (`backend/app/llm/`) | **Claude** writes an upload summary plus, per medium+ incident, a narrative, next steps, questions, a **triage suggestion** (likely malicious / likely benign / needs more evidence, with confidence in words) and **1–3 next-step searches** picked from a menu the backend builds from the evidence (shown as buttons that open Logs filtered). From pseudonymized findings only; only Claude-written text is labeled "AI-generated". Every case, low ones too, also gets a deterministic template "why flagged" text (Claude rewrites it for medium+); without `ANTHROPIC_API_KEY` the template writes all sections, without a verdict, with default searches. | **Implemented** |
 
-**Scores are heuristic ranking signals (0–1), not probabilities of compromise.** The UI calls
-the incident score "Confidence score (heuristic)" and explains it. Example: a request burst can
+**Scores are heuristic ranking signals, not probabilities of compromise.** They are computed as
+0–1 and shown as 0–100: a **risk** per case and a **score** per finding (the hover text says it is a
+heuristic ranking). Example: a request burst can
 be extremely unusual (0.99) but is "a script ran fast", so on its own it reaches only *medium*;
 a malware download followed by beaconing and night activity reaches *critical*. Labels:
 critical ≥ 0.95, high ≥ 0.75, medium ≥ 0.45. Calibrating scores into real confidence would need
@@ -251,7 +265,7 @@ analysts' true/false-positive feedback.
 | Statistics (layer 2) and correlation (layer 3) | No AI: robust statistics and documented rules, so every finding has a checkable reason. | — |
 | Machine learning (layer 4) | IsolationForest (unsupervised) finds user-hours with unusual combinations of behavior. | Per-upload, in-process; attached as evidence only (measured to add no detections on the synthetic data). |
 | AI domain classifier (layer 5) | **Detects:** labels rare domain names (generated, brand look-alike, anonymous file sharing, benign) with confidence and a reason. | Sent: only domain names, their URL categories and request/user counts, under stand-in ids; **no** usernames or IPs. Domain names are attacker-chosen: cleaned, passed as JSON inside tags marked untrusted, answer constrained to a fixed schema and matched back by id. Low weight (0.6), cached per domain, one call per scan for new domains only. Any error → the detector adds nothing. |
-| Claude analysis (layer 6) | Writes the summary, per-incident narratives, next steps, questions, a triage suggestion (worded, never a percentage; pre-selects the Resolve verdict, the analyst decides) and picks next-step searches **by id from our menu** (it can't invent a filter). Default model `claude-sonnet-5-5` (`ANTHROPIC_MODEL`). | Sent: counts and the top 10 medium+ incidents' findings (kinds, scores, times, reasons). **Never** raw log lines, IP addresses or real usernames (stand-ins `user_1`… mapped back after). Log-derived text is cleaned and passed as JSON inside tags the system prompt marks as untrusted data; the answer must use a fixed tool schema, may only refer to incidents we sent, and can't change any priority or evidence. Any API error or unusable answer → template. |
+| Claude analysis (layer 6) | Writes the summary, per-incident narratives, next steps, questions, a triage suggestion (worded, never a percentage; pre-selects the Resolve verdict, the analyst decides) and picks next-step searches **by id from our menu** (it can't invent a filter). Default model `claude-sonnet-5-5` (`ANTHROPIC_MODEL`). | Sent: counts and the top 10 medium+ incidents' findings (kinds, scores, times, reasons). **Never** raw log lines, IP addresses or real usernames (stand-ins `user_1`… mapped back after). Log-derived text is cleaned and passed as JSON inside tags the system prompt marks as untrusted data; the answer must match a fixed JSON schema, may only refer to incidents we sent, and can't change any priority or evidence. Any API error or unusable answer → template. |
 | Building this project | Written with an AI coding assistant (Claude Code). Design decisions, alternatives and measurements were reviewed and decided by the author. | Every change was reviewed and tested. |
 
 **Turning Claude on:** add `ANTHROPIC_API_KEY=…` to the root `.env` (gitignored, not copied into
@@ -400,4 +414,5 @@ samples/            synthetic logs + answer keys (+ edge_cases/)
 
 The live demo runs the same Docker image on a **Render** free web service (`sh start.sh`: migrate,
 worker and API in one container) with a **Neon** free Postgres (`DATABASE_URL`); secrets
-(`SEED_USERS`, `ANTHROPIC_API_KEY`) are set in Render, and uploaded files are temporary on the free plan.
+(`SEED_USERS`, `ANTHROPIC_API_KEY`) are set in Render; on the free plan uploads are capped at 50 MB
+(`MAX_UPLOAD_MB`) and uploaded files are temporary (analysis results stay in Neon).

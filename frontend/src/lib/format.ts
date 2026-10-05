@@ -66,6 +66,12 @@ export function capitalize(text: string): string {
   return text ? text[0].toUpperCase() + text.slice(1) : text
 }
 
+/** "Command & control, suspicious domain (AI), unusual hours" -> each item capitalized:
+ *  "Command & control, Suspicious domain (AI), Unusual hours" (incident titles, user reasons). */
+export function capitalizeEach(list: string): string {
+  return list.split(', ').map(capitalize).join(', ')
+}
+
 /** A chart bucket in words: 1 -> "minute", 15 -> "15 minutes", 60 -> "hour", 360 -> "6 hours",
  *  1440 -> "day" (never "0.0166 hours"). */
 export function bucketLabel(minutes: number): string {

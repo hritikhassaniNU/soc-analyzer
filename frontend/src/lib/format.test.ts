@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bucketLabel, capitalize, formatBytes, formatCompact, formatDateTime, formatPercent, formatRelative, formatUtc } from '@/lib/format'
+import { bucketLabel, capitalize, capitalizeEach, formatBytes, formatCompact, formatDateTime, formatPercent, formatRelative, formatUtc } from '@/lib/format'
 
 describe('formatBytes', () => {
   it.each([
@@ -54,5 +54,13 @@ describe('no comma between date and time', () => {
 describe('bucketLabel', () => {
   it('names every bucket size in words', () => {
     expect([1, 5, 15, 60, 360, 1440].map(bucketLabel)).toEqual(['minute', '5 minutes', '15 minutes', 'hour', '6 hours', 'day'])
+  })
+})
+
+describe('capitalizeEach', () => {
+  it('capitalizes every item of a category list', () => {
+    expect(capitalizeEach('Command & control, suspicious domain (AI), unusual hours'))
+      .toBe('Command & control, Suspicious domain (AI), Unusual hours')
+    expect(capitalizeEach('large upload')).toBe('Large upload')
   })
 })

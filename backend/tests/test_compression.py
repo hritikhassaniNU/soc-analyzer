@@ -1,19 +1,34 @@
 import gzip
 import io
-from pathlib import Path
 
 import pytest
 from sqlalchemy import select
 
 from app.config import get_settings
+from app.generator import Generator, GeneratorConfig
 from app.models import Incident, Upload
 from app.parsing.base import NotZscalerLogError
 from app.parsing.compression import LimitedDecompressedReader, decompress_head, is_gzip
 from app.pipeline.analyze import analyze
 
-SAMPLES = Path(__file__).resolve().parents[2] / "samples" / "edge_cases"  # the standard weeks live here
-GZ_SAMPLE = SAMPLES / "zscaler_sample.jsonl.gz"
 GOOD = ("analyst", "correct-horse-1")
+
+
+def generated_week(log_format: str) -> bytes:
+    """The standard generated week (seed 42, 30 users) as CSV or JSON lines, built in memory."""
+    out = io.StringIO()
+    Generator(GeneratorConfig(seed=42, log_format=log_format)).write(out)
+    return out.getvalue().encode()
+
+
+@pytest.fixture(scope="module")
+def week_csv() -> bytes:
+    return generated_week("csv")
+
+
+@pytest.fixture(scope="module")
+def week_gz() -> bytes:
+    return gzip.compress(generated_week("json"), mtime=0)
 
 
 def gz(data: bytes) -> bytes:
@@ -66,10 +81,10 @@ def post(client, content: bytes, filename: str):
 
 @pytest.mark.integration
 @pytest.mark.parametrize("filename", ["zscaler_sample.jsonl.gz", "events.log"])  # misnamed still works
-def test_gzip_uploads_are_accepted_by_content(client, analyst, filename):
+def test_gzip_uploads_are_accepted_by_content(client, analyst, filename, week_gz):
     client.post("/api/login", auth=GOOD)
 
-    response = post(client, GZ_SAMPLE.read_bytes(), filename)
+    response = post(client, week_gz, filename)
 
     assert response.status_code == 201 and response.json()["format"] == "json"
 
@@ -88,10 +103,10 @@ def test_bad_gzip_uploads_are_rejected(client, analyst, content, filename, detai
 
 
 @pytest.mark.integration
-def test_the_gzip_json_sample_gives_the_same_analysis_as_the_csv_sample(client, analyst, storage, db_session):
+def test_the_gzip_json_week_gives_the_same_analysis_as_the_csv_week(client, analyst, storage, db_session, week_csv, week_gz):
     client.post("/api/login", auth=GOOD)
-    gz_id = post(client, GZ_SAMPLE.read_bytes(), "zscaler_sample.jsonl.gz").json()["id"]
-    csv_id = post(client, (SAMPLES / "zscaler_sample.csv").read_bytes(), "zscaler_sample.csv").json()["id"]
+    gz_id = post(client, week_gz, "week.jsonl.gz").json()["id"]
+    csv_id = post(client, week_csv, "week.csv").json()["id"]
     analyze(gz_id, storage)
     analyze(csv_id, storage)
 
@@ -116,9 +131,9 @@ def tiny_uncompressed_limit(monkeypatch):
 
 @pytest.mark.integration
 def test_a_file_that_expands_beyond_the_limit_fails_with_a_clear_message(
-        client, analyst, storage, tiny_uncompressed_limit):
+        client, analyst, storage, tiny_uncompressed_limit, week_gz):
     client.post("/api/login", auth=GOOD)
-    upload_id = post(client, GZ_SAMPLE.read_bytes(), "zscaler_sample.jsonl.gz").json()["id"]  # 10 MB inside
+    upload_id = post(client, week_gz, "week.jsonl.gz").json()["id"]  # ~11 MB inside
 
     with pytest.raises(NotZscalerLogError, match="expands to more than 1 MB"):
         analyze(upload_id, storage)  # the worker turns this into status=failed with the message

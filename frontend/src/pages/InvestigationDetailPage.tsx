@@ -9,7 +9,7 @@ import CaseDetails from '@/components/investigations/CaseDetails'
 import { SeverityPill, StatusPill } from '@/components/investigations/Labels'
 import { AiAssessment, CaseSearches } from '@/components/investigations/CaseTriage'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { bucketLabel, capitalize } from '@/lib/format'
+import { bucketLabel, capitalize, capitalizeEach } from '@/lib/format'
 import { formatWindow, SEVERITY_COLORS } from '@/lib/incidents'
 import { userPath } from '@/lib/users'
 import { cn } from '@/lib/utils'
@@ -108,7 +108,7 @@ function Header({ d }: { d: InvestigationDetail }) {
           <StatusPill status={d.status} />
         </div>
         <h1 className="page-title mt-1.5">{d.name}</h1>
-        <p className="page-subtitle">{formatWindow(d.start_ts, d.end_ts)} UTC · {d.title}</p>
+        <p className="page-subtitle">{formatWindow(d.start_ts, d.end_ts)} UTC · {capitalizeEach(d.title)}</p>
       </div>
       <CaseActions d={d} />
     </section>

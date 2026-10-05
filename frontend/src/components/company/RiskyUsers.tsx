@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { capitalizeEach } from '@/lib/format'
 import type { RiskyUser } from '@/api/dashboard'
 import RiskMeter from '@/components/RiskMeter'
 import { userPath } from '@/lib/users'
@@ -25,14 +26,14 @@ export default function RiskyUsers({ users, total }: { users: RiskyUser[]; total
             {users.map((u, n) => (
               <li key={u.username}>
                 {/* Compact: name + one truncated reason line; counts on hover. */}
-                <Link to={userPath(u.username)} title={`${u.reason} · ${u.incidents} incident${u.incidents === 1 ? '' : 's'} · ${u.findings} finding${u.findings === 1 ? '' : 's'}`}
+                <Link to={userPath(u.username)} title={`${capitalizeEach(u.reason)} · ${u.incidents} incident${u.incidents === 1 ? '' : 's'} · ${u.findings} finding${u.findings === 1 ? '' : 's'}`}
                       className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50">
                   <span className="w-4 text-sm text-muted-foreground tabular-nums">{n + 1}</span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5 font-medium">
                       <SeverityIcon priority={u.priority} /> <span className="truncate">{u.username}</span>
                     </span>
-                    <span className="block truncate text-sm text-muted-foreground">{u.reason}</span>
+                    <span className="block truncate text-sm text-muted-foreground">{capitalizeEach(u.reason)}</span>
                   </span>
                   <RiskMeter risk={Math.round(u.priority_score * 100)} priority={u.priority} width="w-12" />
                 </Link>

@@ -9,7 +9,7 @@ import RiskMeter from '@/components/RiskMeter'
 import SortHeader from '@/components/SortHeader'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatUtc } from '@/lib/format'
+import { capitalizeEach, formatUtc } from '@/lib/format'
 import { severityOptions } from '@/lib/incidents'
 import { userPath } from '@/lib/users'
 import {
@@ -157,7 +157,7 @@ export default function UsersPage() {
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     <time dateTime={u.last_seen}>{formatUtc(u.last_seen)}</time>
                   </TableCell>
-                  <TableCell className="min-w-56 whitespace-normal text-muted-foreground">{u.reason ?? '—'}</TableCell>
+                  <TableCell className="min-w-56 whitespace-normal text-muted-foreground">{u.reason ? capitalizeEach(u.reason) : '—'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronDown, ChevronRight, Info } from 'lucide-react'
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
+import { capitalizeEach } from '@/lib/format'
 import { type Incident, type Priority, useIncidents } from '@/api/incidents'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -128,7 +129,7 @@ function IncidentRow({ uploadId, incident, aiWritten }: { uploadId: number; inci
           <span className="truncate font-medium" title={incident.username}>{incident.username}</span>
           <span className="text-muted-foreground tabular-nums">{formatWindow(incident.start_ts, incident.end_ts)} UTC</span>
           <span className="sm:col-start-3 sm:col-span-2">
-            {incident.title}
+            {capitalizeEach(incident.title)}
             <span className="text-muted-foreground"> · {findings} finding{findings === 1 ? '' : 's'}</span>
           </span>
         </div>

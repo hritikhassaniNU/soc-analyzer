@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { InvestigationDetail } from '@/api/investigations'
 import { Button } from '@/components/ui/button'
 import { caseSearchParams } from '@/lib/eventFilters'
+import { capitalize } from '@/lib/format'
 import { AI_VERDICT_LABELS } from '@/lib/investigations'
 import { cn } from '@/lib/utils'
 
@@ -18,11 +19,10 @@ export function AiAssessment({ d }: { d: InvestigationDetail }) {
       <p className="min-w-0 flex-1 text-sm">
         <span className="label-caps mr-2">AI assessment</span>
         <span className="font-semibold">{AI_VERDICT_LABELS[a.verdict]}</span>
-        <span className="text-muted-foreground"> · {a.confidence} confidence</span>
+        <span className="text-muted-foreground"> · {capitalize(a.confidence)} confidence</span>
         {/* Model-written: plain text. */}
         <span className="block text-muted-foreground">{a.reason}</span>
       </p>
-      <span className="meta self-center">Suggestion · you decide</span>
     </section>
   )
 }
