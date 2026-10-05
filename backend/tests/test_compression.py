@@ -11,7 +11,7 @@ from app.parsing.base import NotZscalerLogError
 from app.parsing.compression import LimitedDecompressedReader, decompress_head, is_gzip
 from app.pipeline.analyze import analyze
 
-SAMPLES = Path(__file__).resolve().parents[2] / "samples"
+SAMPLES = Path(__file__).resolve().parents[2] / "samples" / "edge_cases"  # the standard weeks live here
 GZ_SAMPLE = SAMPLES / "zscaler_sample.jsonl.gz"
 GOOD = ("analyst", "correct-horse-1")
 
