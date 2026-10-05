@@ -200,35 +200,41 @@ following documented fields (names modeled on NSS web log fields), defined in
 
 ## Architecture
 
-```
- Browser ──HTTPS──► api (FastAPI)  ── serves the React app + /api, one origin
-                     │   ├── login, uploads, summary, events
-                     │   └── stores the raw file ──► storage volume (/data)
-                     ▼
-                PostgreSQL ◄── worker (same image, `python -m app.worker`)
-   users, sessions, uploads (= job queue),          claims queued uploads (FOR UPDATE SKIP LOCKED)
-   events (one partition per upload),               pass 1: stream + parse + rules ──► COPY into Postgres
-   findings, incidents, cases + notes,                                            └─► Parquet file
-   summaries, reviews, detector settings            pass 2: DuckDB on the Parquet ──► aggregates, statistics,
-                                                            ML, AI domain classifier, incidents
-                                                    narrate: Claude (or template) summaries + case triage
-```
+![SOC Analyzer high-level system diagram](docs/architecture.svg)
 
-Key points:
+**How an upload flows**
 
-- **One container image, one origin.** The React build is served by FastAPI, so the session
-  cookie works without CORS. The same image runs as `api`, `worker` and `migrate`.
-- **The upload request never analyzes.** It validates, stores and queues; the worker does the
-  work. Postgres is the job queue (`FOR UPDATE SKIP LOCKED`), so no extra infrastructure, and
-  several workers can run (`docker compose up -d --scale worker=3`).
-- **Streaming everywhere.** Files are parsed line by line and bulk-loaded with `COPY`, so memory
-  stays flat for large uploads (~66 s per 3 million lines measured).
-- **Events are partitioned by upload.** Deleting or re-analyzing an upload drops one partition
-  instantly. The events table uses **keyset pagination** on `(ts, line_no)`: every page reads ~100
-  index entries, however deep (measured: 101 rows read vs 15,101 with `OFFSET`).
-- **Dashboard numbers are computed once,** by DuckDB from a compressed Parquet copy (about 11x
-  smaller than the CSV), and stored, so the dashboard never scans millions of rows.
-- **Analysis is idempotent:** re-running it replaces the previous results.
+1. **Log in and upload.** The analyst signs in (session cookie) and uploads a Zscaler log in the
+   React app, which FastAPI serves from the same origin as the API.
+2. **Validate and store.** The API checks the size, extension and the first 64 KB with the real
+   parser, streams the file to storage and records its SHA-256. It never analyzes in the request.
+3. **Queue.** It inserts the upload as `queued` in Postgres, which doubles as the job queue.
+4. **Claim.** A worker claims the next job with `FOR UPDATE SKIP LOCKED`, so several workers never
+   take the same file; a crashed job is retried after 15 minutes (at most 3 attempts).
+5. **Parse (pass 1).** The file is streamed line by line (CSV or JSON lines, gzip-aware), checked
+   by the line rules, and bulk-loaded with `COPY` into a fresh Postgres partition, plus a compressed
+   Parquet copy. Bad lines are counted and sampled.
+6. **Detect and correlate (pass 2).** DuckDB reads the Parquet copy: dashboard aggregates,
+   statistical detectors, IsolationForest and the AI domain classifier produce findings, which are
+   correlated per user into ranked incidents and cases.
+7. **Summarize.** Claude writes the summary, case narratives and triage from pseudonymized findings
+   (no raw lines, IPs or real names); without an API key a template writes them.
+8. **Explore.** The dashboard, investigations, users and logs pages read the stored results through
+   the REST API, while the page polls the upload's progress until it is **Scanned**.
+
+**Key design choices**
+
+- **One image, one origin.** The same image runs as `api`, `worker` and `migrate` (one container
+  via `start.sh` on small hosts); serving the React build from FastAPI keeps the session cookie
+  same-origin, so no CORS.
+- **Postgres as the queue:** no extra infrastructure, and workers scale out
+  (`docker compose up -d --scale worker=3`).
+- **Streaming everywhere:** memory stays flat for large files (~66 s per 3 million lines measured).
+- **A partition per upload:** deleting or re-analyzing drops one partition instantly; the Logs table
+  uses **keyset pagination** on `(ts, line_no)`, so page 1,000 is as fast as page 1.
+- **Computed once:** DuckDB on Parquet (~11x smaller than the CSV) produces the dashboard numbers
+  and findings once per upload; pages never rescan millions of rows.
+- **Idempotent:** re-analyzing an upload replaces its previous results.
 
 **Stack:** Python 3.12, FastAPI, SQLAlchemy 2.0, Alembic, psycopg 3, PostgreSQL 17, DuckDB,
 PyArrow · React 19, TypeScript, Vite, TanStack Query, React Router, Tailwind CSS, shadcn/ui,
@@ -241,14 +247,14 @@ Recharts · Docker Compose · uv, npm.
 Detection runs in layers; each turns into readable **findings** (what, who, when, why, score),
 and findings are correlated into **incidents** an analyst can triage.
 
-| Layer | What it does | Status |
-|---|---|---|
-| **1. Rules** (`detection/rules.py`, `rule_groups.py`) | Single-line checks: Zscaler-detected threat, high-risk request allowed (risk ≥ 75), scripted client (curl, python-requests, PowerShell…), executable download. Hits of the same rule by the same user are grouped. | **Implemented** |
-| **2. Statistics** (`behavior.py`, `beaconing.py`, `rare_domains.py`) | Per-user baselines with robust statistics (median/MAD, so the attack can't hide by inflating the baseline): request bursts, unusually large uploads, unusual hours (in the log's timezone), beaconing (machine-regular timing to a destination few users contact), rare random-looking domains. Every flag needs "unusual for this user" **and** "big enough to matter". | **Implemented** |
-| **3. Correlation** (`correlate.py`) | A user's findings within 24 h form an incident. Priority = strongest finding weighted by how serious its kind is, + 0.1 for each other kind of evidence that is meaningful on its own. Large uploads to approved company storage (`APPROVED_UPLOAD_HOSTS`) are ranked down, never hidden. | **Implemented** |
-| **4. Machine learning** (`ml.py`, scikit-learn) | IsolationForest on 9 per-user-hour features, each scaled to "how unusual for this user"; reports an hour only if it is isolated **and** at least two features are clearly unusual (a combination, not one extreme). **Evidence only:** measured on 5+5 generated weeks it flagged as many hours in attack-free weeks (19) as in attack weeks (20), all look-alikes or hours already in an incident, so an ML finding is kept only when it overlaps an existing incident, and never changes its priority. | **Implemented (evidence only)** |
-| **5. AI domain classifier** (`detection/ai_domains.py`, `llm/domains.py`) | **Claude** judges the names of rare domains (contacted by ≤ 2 users, ≤ 150 per scan): randomly generated, brand look-alike (e.g. `rnicrosoft-login.com`), anonymous file sharing, or likely benign, with low/medium/high confidence and a reason. Medium/high suspicious answers become findings in their own evidence category with a low weight (0.6): they corroborate other evidence but rarely raise a case alone. Exception: a brand look-alike (phishing) weighs 0.9, so one alone is a medium case. Answers are cached per domain. Only with `ANTHROPIC_API_KEY`; switchable on the Rules page. | **Implemented** |
-| **6. LLM analysis** (`backend/app/llm/`) | **Claude** writes an upload summary plus, per medium+ incident, a narrative, next steps, questions, a **triage suggestion** (likely malicious / likely benign / needs more evidence, with confidence in words) and **1–3 next-step searches** picked from a menu the backend builds from the evidence (shown as buttons that open Logs filtered). From pseudonymized findings only; only Claude-written text is labeled "AI-generated". Every case, low ones too, also gets a deterministic template "why flagged" text (Claude rewrites it for medium+); without `ANTHROPIC_API_KEY` the template writes all sections, without a verdict, with default searches. | **Implemented** |
+| Layer | What it does |
+|---|---|
+| **1. Rules** (`detection/rules.py`, `rule_groups.py`) | Single-line checks: Zscaler-detected threat, high-risk request allowed (risk ≥ 75), scripted client (curl, python-requests, PowerShell…), executable download. Hits of the same rule by the same user are grouped. |
+| **2. Statistics** (`behavior.py`, `beaconing.py`, `rare_domains.py`) | Per-user baselines with robust statistics (median/MAD, so the attack can't hide by inflating the baseline): request bursts, unusually large uploads, unusual hours (in the log's timezone), beaconing (machine-regular timing to a destination few users contact), rare random-looking domains. Every flag needs "unusual for this user" **and** "big enough to matter". |
+| **3. Correlation** (`correlate.py`) | A user's findings within 24 h form an incident. Priority = strongest finding weighted by how serious its kind is, + 0.1 for each other kind of evidence that is meaningful on its own. Large uploads to approved company storage (`APPROVED_UPLOAD_HOSTS`) are ranked down, never hidden. |
+| **4. Machine learning** (`ml.py`, scikit-learn) | IsolationForest on 9 per-user-hour features, each scaled to "how unusual for this user"; reports an hour only if it is isolated **and** at least two features are clearly unusual (a combination, not one extreme). **Evidence only:** measured on 5+5 generated weeks it flagged as many hours in attack-free weeks (19) as in attack weeks (20), all look-alikes or hours already in an incident, so an ML finding is kept only when it overlaps an existing incident, and never changes its priority. |
+| **5. AI domain classifier** (`detection/ai_domains.py`, `llm/domains.py`) | **Claude** judges the names of rare domains (contacted by ≤ 2 users, ≤ 150 per scan): randomly generated, brand look-alike (e.g. `rnicrosoft-login.com`), anonymous file sharing, or likely benign, with low/medium/high confidence and a reason. Medium/high suspicious answers become findings in their own evidence category with a low weight (0.6): they corroborate other evidence but rarely raise a case alone. Exception: a brand look-alike (phishing) weighs 0.9, so one alone is a medium case. Answers are cached per domain. Only with `ANTHROPIC_API_KEY`; switchable on the Rules page. |
+| **6. LLM analysis** (`backend/app/llm/`) | **Claude** writes an upload summary plus, per medium+ incident, a narrative, next steps, questions, a **triage suggestion** (likely malicious / likely benign / needs more evidence, with confidence in words) and **1–3 next-step searches** picked from a menu the backend builds from the evidence (shown as buttons that open Logs filtered). From pseudonymized findings only; only Claude-written text is labeled "AI-generated". Every case, low ones too, also gets a deterministic template "why flagged" text (Claude rewrites it for medium+); without `ANTHROPIC_API_KEY` the template writes all sections, without a verdict, with default searches. |
 
 **Scores are heuristic ranking signals, not probabilities of compromise.** They are computed as
 0–1 and shown as 0–100: a **risk** per case and a **score** per finding (the hover text says it is a
@@ -321,15 +327,10 @@ generated week; real logs wouldn't look like that.
   are random 256-bit values stored only as SHA-256 hashes; sessions expire after 8 hours; logout
   revokes the session on the server. Passwords use bcrypt. Every API route except login, logout
   and health requires a session, enforced by a test over the whole OpenAPI schema.
-- **Untrusted log content:** URLs, user agents, filenames and bad-line samples are attacker-
-  controlled and always rendered as text (never as HTML). A **Content Security Policy** blocks
-  inline and third-party scripts, so even mis-rendered text couldn't execute.
 - **Uploads:** size limit checked from `Content-Length` before the body is read, extension and
   content checks, files stored with private permissions under random keys, path-traversal guards.
 - **SQL:** all user input is passed as bound parameters; sort orders and identifiers are fixed.
 - **Containers:** run as a non-root user; secrets come from `.env` (gitignored).
-- **Dependencies:** `npm audit --omit=dev` reports no vulnerabilities in what ships; the shadcn
-  CLI (development tooling only) has an upstream issue without a fix yet.
 
 ---
 
@@ -386,27 +387,14 @@ samples/            synthetic logs + answer keys (+ edge_cases/)
 
 ---
 
-## Known limitations & roadmap
+## Known limitations
 
 **Limitations today**
 
 - **Synthetic data only.** The samples prove the pipeline and detections find what was planted
   and stay quiet on realistic look-alikes; they don't prove real-world accuracy.
-- Detection has the blind spots listed under *Detection quality*; machine learning adds no
-  detections on the synthetic data (it only explains existing incidents). The AI summary can be
-  wrong or, in the worst case, manipulated by crafted log text; it can't change priorities or
-  evidence, and it is labeled.
 - **No login rate limiting** and no audit log of deletions yet.
-- Uploads go through the API; very large files without a `Content-Length` header are spooled to
-  temporary disk before the size check. The production design uploads directly to cloud storage.
 - Only the fields above (and their listed aliases); other NSS feed templates may need mapping.
-- The runtime image is large (-660 MB before scikit-learn: PyArrow, DuckDB, and now NumPy/SciPy).
-
-**Roadmap**
-
-1. End-to-end browser tests.
-2. Production deployment (e.g. Cloud Run, Cloud SQL, Cloud Storage with signed uploads) with
-   login rate limiting, upload quotas and SSO.
 
 ---
 
