@@ -28,6 +28,12 @@ if _dev_url is not None:
     os.environ["DATABASE_URL"] = _test_url.render_as_string(hide_password=False)
     get_settings.cache_clear()  # next get_settings() call sees the test URL
 
+# Tests must never call the real Claude API with the developer's key from .env (cost, network,
+# non-deterministic output). An environment variable beats the .env file in pydantic-settings, and
+# an empty key means "template summary". LLM behavior is tested with a fake client instead.
+os.environ["ANTHROPIC_API_KEY"] = ""
+get_settings.cache_clear()
+
 
 def _create_test_database_if_missing() -> None:
     # CREATE DATABASE can't run inside a transaction, so connect to the built-in
@@ -72,3 +78,37 @@ def db_session(migrated_db):
 
     with SessionLocal() as session:
         yield session
+
+
+@pytest.fixture
+def storage(tmp_path):
+    """Uploaded files go to a temporary folder, never the real data/ directory."""
+    from app.storage import LocalStorage
+
+    return LocalStorage(tmp_path / "storage")
+
+
+@pytest.fixture
+def client(db_session, storage):
+    """HTTP test client on an empty soc_test database (app.db already points at soc_test)."""
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.storage import get_storage
+
+    app.dependency_overrides[get_storage] = lambda: storage
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def analyst(db_session):
+    """A seeded analyst account: analyst / correct-horse-1."""
+    from app.models import User
+    from app.security import hash_password
+
+    user = User(username="analyst", password_hash=hash_password("correct-horse-1"))
+    db_session.add(user)
+    db_session.commit()
+    return user
